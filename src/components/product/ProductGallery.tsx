@@ -38,8 +38,8 @@ export default function ProductGallery({ images, name }: { images: string[]; nam
                   aria-selected={isCurrent}
                   aria-label={`Ver foto ${i + 1}`}
                   onClick={() => setActive(i)}
-                  className={`group relative aspect-[3/4] w-16 shrink-0 overflow-hidden rounded-xl bg-sand ring-offset-2 ring-offset-ivory transition md:w-20 ${
-                    isCurrent ? "ring-2 ring-ink shadow-sm opacity-100" : "opacity-60 hover:opacity-100"
+                  className={`group relative aspect-[3/4] w-16 shrink-0 overflow-hidden rounded-xl bg-sand transition md:w-20 ${
+                    isCurrent ? "opacity-100 shadow-sm" : "opacity-50 hover:opacity-100"
                   }`}
                 >
                   <Image
