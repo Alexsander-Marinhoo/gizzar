@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useId } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination } from "swiper/modules";
 import type { Swiper as SwiperType } from "swiper";
@@ -15,6 +15,10 @@ import ProductCard from "./ProductCard";
 import { ArrowLeftIcon, ArrowRightIcon } from "@/components/ui/Icons";
 
 export default function ProductCarousel({ products }: { products: Product[] }) {
+  const rawId = useId();
+  const cleanId = rawId.replace(/[^a-zA-Z0-9]/g, "");
+  const paginationClass = `custom-pagination-${cleanId}`;
+
   const [mounted, setMounted] = useState(false);
   const [swiperInstance, setSwiperInstance] = useState<SwiperType | null>(null);
   const [isBeginning, setIsBeginning] = useState(true);
@@ -75,7 +79,7 @@ export default function ProductCarousel({ products }: { products: Product[] }) {
         grabCursor={true}
         pagination={{
           clickable: true,
-          el: ".custom-swiper-pagination",
+          el: `.${paginationClass}`,
           bulletClass: "inline-block w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-stone transition-all duration-300 mx-0.5 sm:mx-1 cursor-pointer",
           bulletActiveClass: "!w-5 sm:!w-7 !bg-gold",
         }}
@@ -109,7 +113,7 @@ export default function ProductCarousel({ products }: { products: Product[] }) {
       </Swiper>
 
       {/* PAGINAÇÃO COM BULLETS ELEGANTES */}
-      <div className="custom-swiper-pagination mt-6 flex justify-center items-center" />
+      <div className={`${paginationClass} mt-6 flex justify-center items-center`} />
     </div>
   );
 }

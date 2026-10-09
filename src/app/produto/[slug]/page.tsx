@@ -4,9 +4,9 @@ import { notFound } from "next/navigation";
 import ProductGallery from "@/components/product/ProductGallery";
 import PriceTag from "@/components/product/PriceTag";
 import PurchasePanel from "@/components/product/PurchasePanel";
-import ProductCard from "@/components/product/ProductCard";
+import ProductCarousel from "@/components/product/ProductCarousel";
 import { SecureBadges } from "@/components/ui/Trust";
-import { WhatsAppIcon } from "@/components/ui/Icons";
+import { ArrowRightIcon, WhatsAppIcon } from "@/components/ui/Icons";
 import { getAllProducts, getProductBySlug, getRelatedProducts } from "@/data/products";
 import { whatsappLink } from "@/config/site";
 
@@ -30,7 +30,7 @@ export default async function ProductPage({ params }: PageProps<"/produto/[slug]
   const product = getProductBySlug(slug);
   if (!product) notFound();
 
-  const related = getRelatedProducts(product);
+  const related = getRelatedProducts(product, 8);
 
   return (
     <div className="container-page pb-32 sm:pb-20 pt-6 sm:pt-10">
@@ -102,12 +102,26 @@ export default async function ProductPage({ params }: PageProps<"/produto/[slug]
       </div>
 
       {related.length > 0 && (
-        <section className="mt-24">
-          <h2 className="heading-display mb-8 text-3xl sm:text-4xl">Você também vai amar</h2>
-          <div className="grid grid-cols-2 gap-x-3 gap-y-6 sm:gap-x-6 sm:gap-y-10 lg:grid-cols-4">
-            {related.map((p) => (
-              <ProductCard key={p.id} product={p} />
-            ))}
+        <section className="mt-20 sm:mt-24 overflow-hidden">
+          <div className="mb-6 sm:mb-8 flex items-end justify-between gap-6">
+            <div>
+              <p className="eyebrow">Sugestões para você</p>
+              <h2 className="heading-display mt-2 text-3xl sm:text-4xl">Você também vai amar</h2>
+            </div>
+            <Link
+              href="/catalogo"
+              className="group hidden items-center gap-2 text-sm font-semibold text-ink sm:inline-flex mr-24"
+            >
+              Ver todas <ArrowRightIcon size={16} className="transition group-hover:translate-x-1" />
+            </Link>
+          </div>
+
+          <ProductCarousel products={related} />
+
+          <div className="mt-8 text-center sm:hidden">
+            <Link href="/catalogo" className="btn-outline">
+              Ver todas as bolsas
+            </Link>
           </div>
         </section>
       )}
