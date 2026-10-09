@@ -41,7 +41,7 @@ export default function HomePage() {
       </div>
 
       {/* DESTAQUES DA VITRINE COM CARROSSEL SWIPER — APARECE LOGO DE CARA NO DESKTOP */}
-      <section className="container-page mt-6 sm:mt-8">
+      <section className="container-page mt-6 sm:mt-8 overflow-hidden">
 
         <div className="mb-6 sm:mb-8 flex items-end justify-between gap-6">
           <div>

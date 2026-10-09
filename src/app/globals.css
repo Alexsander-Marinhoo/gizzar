@@ -57,12 +57,19 @@
 }
 
 @layer base {
+  html,
+  body {
+    overflow-x: hidden;
+    max-width: 100%;
+  }
   html {
     scroll-behavior: smooth;
     -webkit-tap-highlight-color: transparent;
   }
   body {
     @apply bg-ivory text-ink font-sans antialiased;
+    position: relative;
+    width: 100%;
   }
   ::selection {
     @apply bg-gold-light text-ink;

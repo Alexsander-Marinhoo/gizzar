@@ -36,7 +36,7 @@ export default function ProductCarousel({ products }: { products: Product[] }) {
   }
 
   return (
-    <div className="relative">
+    <div className="relative w-full overflow-hidden">
       {/* CONTROLES DO CARROSSEL (SETAS DE NAVEGAÇÃO CUSTOMIZADAS) */}
       <div className="absolute -top-14 right-0 hidden sm:flex items-center gap-2 z-10">
         <button
@@ -97,7 +97,7 @@ export default function ProductCarousel({ products }: { products: Product[] }) {
             spaceBetween: 24,
           },
         }}
-        className="!overflow-visible sm:!overflow-hidden pb-4"
+        className="w-full !overflow-hidden pb-4"
       >
         {products.map((p, i) => (
           <SwiperSlide key={p.id} className="h-auto">
