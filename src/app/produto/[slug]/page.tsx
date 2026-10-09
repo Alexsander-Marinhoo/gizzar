@@ -33,7 +33,7 @@ export default async function ProductPage({ params }: PageProps<"/produto/[slug]
   const related = getRelatedProducts(product);
 
   return (
-    <div className="container-page pb-16 pt-6 sm:pt-10">
+    <div className="container-page pb-32 sm:pb-20 pt-6 sm:pt-10">
       <nav aria-label="Breadcrumb" className="mb-6 text-xs text-taupe">
         <Link href="/" className="hover:text-ink">Início</Link>
         <span className="mx-2">/</span>

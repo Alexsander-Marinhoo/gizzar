@@ -47,14 +47,16 @@ export default function PurchasePanel({ product }: { product: Product }) {
 
       {/* Barra fixa de compra — mobile */}
       {!soldOut && (
-        <div className="fixed inset-x-0 bottom-0 z-30 animate-[slide-up_0.4s_ease_both] border-t border-stone/60 bg-ivory/95 px-5 py-3 backdrop-blur-xl md:hidden">
-          <div className="flex items-center gap-4">
+        <div className="fixed inset-x-0 bottom-0 z-30 animate-[slide-up_0.4s_ease_both] border-t border-stone/60 bg-ivory/95 px-4 py-2.5 pb-[calc(0.65rem+env(safe-area-inset-bottom))] shadow-lg backdrop-blur-xl md:hidden">
+          <div className="flex items-center justify-between gap-3">
             <div className="min-w-0 flex-1">
               <p className="truncate text-xs text-taupe">{product.name}</p>
-              <p className="font-semibold">{formatPrice(product.price)}</p>
-              <p className="truncate text-[11px] text-taupe">{installmentLabel(product.price)}</p>
+              <p className="text-base font-semibold leading-tight text-ink">{formatPrice(product.price)}</p>
+              <p className="text-[11px] text-taupe leading-tight">{installmentLabel(product.price)}</p>
             </div>
-            <AddToCartButton productId={product.id} quantity={quantity} buyNow variant="compact" className="px-6! py-3.5!" />
+            <div className="shrink-0">
+              <AddToCartButton productId={product.id} quantity={quantity} buyNow variant="compact" className="px-5! py-3! text-xs font-semibold whitespace-nowrap" />
+            </div>
           </div>
         </div>
       )}
