@@ -1,0 +1,31 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1c1917" />
+      <stop offset="100%" stop-color="#12100e" />
+    </linearGradient>
+    <linearGradient id="goldGrad" x1="20%" y1="0%" x2="80%" y2="100%">
+      <stop offset="0%" stop-color="#f3e5c8" />
+      <stop offset="35%" stop-color="#d8c095" />
+      <stop offset="70%" stop-color="#b08d57" />
+      <stop offset="100%" stop-color="#8a6a3b" />
+    </linearGradient>
+    <linearGradient id="goldBorder" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#d8c095" stop-opacity="0.8" />
+      <stop offset="50%" stop-color="#b08d57" stop-opacity="0.3" />
+      <stop offset="100%" stop-color="#8a6a3b" stop-opacity="0.6" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background container -->
+  <rect x="8" y="8" width="496" height="496" rx="112" fill="url(#bgGrad)" />
+  <rect x="14" y="14" width="484" height="484" rx="106" stroke="url(#goldBorder)" stroke-width="12" />
+
+  <!-- Monogram G in luxury serif typography -->
+  <g fill="url(#goldGrad)">
+    <path d="M 334 168 C 322 142 296 124 256 124 C 182 124 134 182 134 260 C 134 336 182 392 258 392 C 316 392 354 356 364 298 L 254 298 L 254 266 L 396 266 L 396 288 C 392 370 338 424 256 424 C 160 424 98 352 98 258 C 98 162 162 92 258 92 C 312 92 352 116 372 152 Z" />
+  </g>
+
+  <!-- Underline gold accent echoing the GIZZAR logo -->
+  <rect x="206" y="440" width="100" height="8" rx="4" fill="url(#goldGrad)" opacity="0.9" />
+</svg>
