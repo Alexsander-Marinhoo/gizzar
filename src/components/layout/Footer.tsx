@@ -60,8 +60,19 @@ export default function Footer() {
         </div>
       </div>
       <div className="border-t border-ivory/10">
-        <div className="container-page py-6 text-center text-xs text-ivory/40">
+        <div className="container-page flex flex-col items-center justify-between gap-2.5 py-6 text-center text-xs text-ivory/40 sm:flex-row">
           <p>© {siteConfig.name}. Todos os direitos reservados.</p>
+          <p>
+            Desenvolvido por{" "}
+            <a
+              href="https://www.instagram.com/alexsander.code/?hl=pt-br"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-ivory/70 transition hover:text-gold-light underline underline-offset-4 decoration-ivory/20 hover:decoration-gold-light"
+            >
+              Alex.Code
+            </a>
+          </p>
         </div>
       </div>
     </footer>
