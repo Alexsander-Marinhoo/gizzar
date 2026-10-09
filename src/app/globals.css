@@ -1,0 +1,116 @@
+@import "tailwindcss";
+
+/* ============================================================
+   GIZZAR — Design tokens
+   Paleta: marfim, areia, tinta (preto quente) e dourado.
+   ============================================================ */
+@theme {
+  --color-ivory: #faf7f2;
+  --color-sand: #f0e9de;
+  --color-stone: #ddd3c4;
+  --color-taupe: #74685c;
+  --color-ink: #161412;
+  --color-ink-soft: #2a2622;
+  --color-gold: #b08d57;
+  --color-gold-light: #d8c095;
+  --color-gold-dark: #8a6a3b;
+  --color-success: #3f6b4f;
+  --color-danger: #a23b3b;
+
+  --font-display: var(--font-cormorant), "Times New Roman", serif;
+  --font-sans: var(--font-manrope), system-ui, sans-serif;
+
+  --animate-fade-up: fade-up 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-fade-in: fade-in 0.6s ease both;
+  --animate-marquee: marquee 28s linear infinite;
+  --animate-slide-in: slide-in 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-pop: pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+  @keyframes slide-in {
+    from { transform: translateX(100%); }
+    to { transform: translateX(0); }
+  }
+  @keyframes slide-in-left {
+    from { transform: translateX(-100%); }
+    to { transform: translateX(0); }
+  }
+  @keyframes slide-up {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+  @keyframes pop {
+    0% { transform: scale(0.6); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    @apply bg-ivory text-ink font-sans antialiased;
+  }
+  ::selection {
+    @apply bg-gold-light text-ink;
+  }
+}
+
+@utility btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-full px-7 py-3.5 text-sm font-semibold tracking-wide transition-all duration-300 active:scale-[0.97] disabled:pointer-events-none disabled:opacity-50;
+}
+
+@layer components {
+  .container-page {
+    @apply mx-auto w-full max-w-7xl px-5 sm:px-8;
+  }
+  .eyebrow {
+    @apply text-[11px] font-semibold uppercase tracking-[0.3em] text-gold-dark;
+  }
+  .heading-display {
+    @apply font-display font-medium leading-[1.05] tracking-tight;
+  }
+  .btn-primary {
+    @apply btn bg-ink text-ivory hover:bg-gold-dark hover:shadow-lg hover:shadow-gold/20;
+  }
+  .btn-gold {
+    @apply btn bg-gold text-ink hover:bg-gold-light;
+  }
+  .btn-outline {
+    @apply btn border border-ink/20 text-ink hover:border-ink hover:bg-ink hover:text-ivory;
+  }
+  .input {
+    @apply w-full rounded-xl border border-stone bg-white px-4 py-3.5 text-[15px] text-ink placeholder:text-taupe/60 outline-none transition focus:border-gold focus:ring-4 focus:ring-gold/15;
+  }
+  .label {
+    @apply mb-1.5 block text-xs font-semibold uppercase tracking-wider text-taupe;
+  }
+  .card {
+    @apply rounded-3xl border border-stone/60 bg-white/70 backdrop-blur;
+  }
+  .gold-line {
+    @apply h-px w-12 bg-linear-to-r from-gold to-transparent;
+  }
+}
+
+/* Ocultar badge de desenvolvimento do Next.js (DevTools / Insights) */
+nextjs-portal,
+[data-nextjs-dev-indicator],
+[data-nextjs-toast-wrapper],
+#next-route-announcer {
+  display: none !important;
+}
+
