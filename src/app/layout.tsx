@@ -53,7 +53,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="pt-BR" className={`${cormorant.variable} ${manrope.variable}`}>
-      <body className="flex min-h-dvh flex-col overflow-x-hidden">
+      <body className="flex min-h-dvh flex-col">
         <AnnouncementBar />
         <Header />
         <main className="flex-1">{children}</main>

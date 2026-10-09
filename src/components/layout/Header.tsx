@@ -33,7 +33,7 @@ export default function Header() {
     <>
       <header
         className={`sticky top-0 z-40 transition-all duration-300 ${
-          scrolled ? "bg-ivory/85 shadow-[0_1px_0_0_rgba(22,20,18,0.06)] backdrop-blur-xl" : "bg-ivory"
+          scrolled ? "bg-ivory/95 shadow-[0_4px_20px_rgba(22,20,18,0.06)] border-b border-stone/60 backdrop-blur-xl" : "bg-ivory border-b border-stone/20"
         }`}
       >
         <div className="container-page grid h-[74px] grid-cols-[1fr_auto_1fr] items-center sm:h-[86px]">
