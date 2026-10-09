@@ -47,7 +47,7 @@ export default async function ProductPage({ params }: PageProps<"/produto/[slug]
           <ProductGallery images={product.images} name={product.name} />
         </div>
 
-        <div className="animate-fade-up">
+        <div className="animate-fade-in">
           {product.isNew && <p className="eyebrow mb-3">Novidade</p>}
           <h1 className="heading-display text-4xl sm:text-5xl">{product.name}</h1>
           <p className="mt-3 text-taupe">{product.shortDescription}</p>
@@ -87,7 +87,7 @@ export default async function ProductPage({ params }: PageProps<"/produto/[slug]
               href={whatsappLink(`Olá! Tenho interesse na ${product.name}. Pode me ajudar?`)}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-4 rounded-2xl border border-stone/70 bg-white/60 p-5 transition hover:border-[#25D366]"
+              className="flex items-center gap-4 rounded-2xl border border-stone/70 bg-white/60 p-5 transition hover:border-[#25D366] mb-6"
             >
               <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#25D366] text-white">
                 <WhatsAppIcon size={22} />

@@ -47,7 +47,7 @@ export default function PurchasePanel({ product }: { product: Product }) {
 
       {/* Barra fixa de compra — mobile */}
       {!soldOut && (
-        <div className="fixed inset-x-0 bottom-0 z-30 animate-[slide-up_0.4s_ease_both] border-t border-stone/60 bg-ivory/95 px-4 py-2.5 pb-[calc(0.65rem+env(safe-area-inset-bottom))] shadow-lg backdrop-blur-xl md:hidden">
+        <div className="fixed inset-x-0 bottom-0 z-30 border-t border-stone/60 bg-ivory/95 px-4 py-2.5 pb-[calc(0.65rem+env(safe-area-inset-bottom))] shadow-lg backdrop-blur-xl md:hidden">
           <div className="flex items-center justify-between gap-3">
             <div className="min-w-0 flex-1">
               <p className="truncate text-xs text-taupe">{product.name}</p>

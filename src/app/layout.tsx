@@ -56,7 +56,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <body className="flex min-h-dvh flex-col overflow-x-hidden">
         <AnnouncementBar />
         <Header />
-        <main className="flex-1 overflow-x-hidden">{children}</main>
+        <main className="flex-1">{children}</main>
         <Footer />
         <WhatsAppFloat />
       </body>
