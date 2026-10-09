@@ -15,7 +15,7 @@ export const siteConfig = {
 
   contact: {
     /** Número do WhatsApp com DDI + DDD, só dígitos. Ex.: 5511999999999 */
-    whatsapp: "5511999999999",
+    whatsapp: "5521979385856",
     whatsappMessage: "Olá! Vim pelo site da GIZZAR e gostaria de mais informações.",
     email: "contato@gizzar.com.br",
     instagram: "https://instagram.com/gizzar",
