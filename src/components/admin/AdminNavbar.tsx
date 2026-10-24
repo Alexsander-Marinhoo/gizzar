@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { clearAdminSession, AdminSession } from "@/lib/admin-store";
 import { useState } from "react";
 import { MenuIcon, CloseIcon } from "@/components/ui/Icons";
-import { ExternalLinkIcon, LogoutIcon } from "./AdminIcons";
+import { LogoutIcon } from "./AdminIcons";
 
 export type AdminTab = "overview" | "products" | "banner" | "orders";
 
@@ -39,7 +39,6 @@ export default function AdminNavbar({
       label: "Produtos",
       badge: productsCount > 0 ? productsCount : undefined,
     },
-    { id: "banner" as AdminTab, label: "Banner Promocional" },
     {
       id: "orders" as AdminTab,
       label: "Vendas & Pedidos",
@@ -108,20 +107,10 @@ export default function AdminNavbar({
           })}
         </nav>
 
-        {/* Direita: Ações, Perfil e Sair */}
+        {/* Direita: Perfil e Sair */}
         <div className="flex items-center gap-3">
-          <Link
-            href="/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hidden sm:inline-flex items-center gap-1.5 rounded-full border border-ink/20 px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-ink hover:bg-ink hover:text-ivory transition"
-          >
-            <span>Ver Loja</span>
-            <ExternalLinkIcon size={12} />
-          </Link>
-
           {/* Perfil */}
-          <div className="flex items-center gap-2.5 pl-2 border-l border-stone/70">
+          <div className="flex items-center gap-2.5">
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-sand border border-stone text-ink font-serif font-bold text-xs">
               {session?.name ? session.name.slice(0, 2).toUpperCase() : "AM"}
             </div>
@@ -197,18 +186,10 @@ export default function AdminNavbar({
             </div>
 
             <div className="pt-6 border-t border-stone/60 space-y-3">
-              <Link
-                href="/"
-                target="_blank"
-                className="btn-outline w-full text-xs py-2.5"
-              >
-                <span>Ver Loja</span>
-                <ExternalLinkIcon size={13} />
-              </Link>
               <button
                 type="button"
                 onClick={handleLogout}
-                className="w-full text-center py-2 text-xs font-semibold uppercase tracking-wider text-taupe hover:text-ink"
+                className="w-full text-center py-2.5 text-xs font-semibold uppercase tracking-wider text-taupe hover:text-ink hover:bg-sand rounded-xl transition"
               >
                 Sair do Painel
               </button>
