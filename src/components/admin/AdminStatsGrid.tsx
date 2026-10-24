@@ -5,6 +5,7 @@ import {
   OrdersIcon,
   ProductsIcon,
   TruckIcon,
+  TrendingUpIcon,
   ChevronRightIcon,
 } from "./AdminIcons";
 import { formatPrice } from "@/lib/format";
@@ -25,6 +26,8 @@ export default function AdminStatsGrid({
   productsCount,
   setActiveTab,
 }: AdminStatsGridProps) {
+  const averageTicket = totalOrdersCount > 0 ? totalRevenue / totalOrdersCount : 0;
+
   const stats = [
     {
       id: "sales",
@@ -54,10 +57,19 @@ export default function AdminStatsGrid({
       onClick: () => setActiveTab("orders"),
       badge: pendingOrdersCount > 0 ? "Pendente" : undefined,
     },
+    {
+      id: "ticket",
+      title: "Ticket médio",
+      value: formatPrice(averageTicket),
+      subtitle: "Média por compra",
+      icon: TrendingUpIcon,
+      actionText: "Consultar",
+      onClick: () => setActiveTab("orders"),
+    },
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
       {stats.map((stat) => {
         const Icon = stat.icon;
         return (
