@@ -329,8 +329,8 @@ export default function AdminProductModal({
         onClick={onClose}
       />
 
-      {/* Janela Modal estilo Página do Produto (WYSIWYG Live Preview) */}
-      <div className="relative w-full max-w-5xl max-h-[94vh] overflow-y-auto rounded-3xl bg-ivory shadow-2xl border border-stone/80 z-10 animate-fade-up my-auto flex flex-col">
+      {/* Janela Modal estilo Página do Produto (WYSIWYG Live Preview) - Tamanho ampliado */}
+      <div className="relative w-full max-w-6xl xl:max-w-7xl max-h-[96vh] overflow-y-auto rounded-3xl bg-ivory shadow-2xl border border-stone/80 z-10 animate-fade-up my-auto flex flex-col">
         {/* Barra Superior Informativa do Editor Visual */}
         <div className="sticky top-0 z-20 flex items-center justify-between border-b border-stone/60 bg-ivory/95 px-6 py-3.5 backdrop-blur-md">
           <div className="flex items-center gap-2.5">
@@ -401,7 +401,7 @@ export default function AdminProductModal({
                ============================================================ */}
             <div>
               {images.length === 0 ? (
-                /* ÁREA VAZIA CONFORME SOLICITADO: SEM FOTO ALGUMA, SOMENTE PARÁGRAFO PARA ADICIONAR IMAGENS DA MÁQUINA */
+                /* ÁREA VAZIA CONFORME SOLICITADO: SEM FOTO ALGUMA E SEM O ÍCONE, SOMENTE PARÁGRAFO */
                 <div
                   onDragOver={(e) => {
                     e.preventDefault();
@@ -409,33 +409,28 @@ export default function AdminProductModal({
                   }}
                   onDragLeave={() => setIsDragging(false)}
                   onDrop={handleDrop}
-                  className={`relative aspect-[3/4] w-full rounded-3xl border-2 border-dashed transition-all duration-300 p-8 flex flex-col items-center justify-center text-center cursor-pointer group ${
+                  className={`relative aspect-[3/4] w-full rounded-3xl border-2 border-dashed transition-all duration-300 p-8 sm:p-12 flex flex-col items-center justify-center text-center cursor-pointer group ${
                     isDragging
                       ? "border-gold bg-gold/10 scale-101"
                       : "border-stone/90 bg-sand/40 hover:border-gold hover:bg-sand/70 shadow-2xs"
                   }`}
                 >
-                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white border border-stone/70 text-ink shadow-xs group-hover:scale-105 group-hover:border-gold transition">
-                    <UploadCloudIcon size={28} />
-                  </div>
-
-                  <h3 className="mt-4 font-display text-lg sm:text-xl font-medium text-ink">
+                  <h3 className="font-display text-xl sm:text-2xl font-medium text-ink">
                     Adicionar imagens da máquina
                   </h3>
 
                   {/* Parágrafo explícito solicitado pelo usuário para levar para bucket do Supabase depois */}
-                  <p className="mt-2.5 text-xs sm:text-sm text-taupe leading-relaxed max-w-xs">
+                  <p className="mt-3 text-xs sm:text-sm text-taupe leading-relaxed max-w-sm">
                     Clique ou arraste imagens da sua máquina para adicionar ao produto. As fotos serão salvas e enviadas para o bucket de armazenamento no Supabase posteriormente.
                   </p>
 
-                  <div className="mt-5">
-                    <span className="btn-primary rounded-full px-5 py-2.5 text-xs font-semibold shadow-xs inline-flex items-center gap-2 group-hover:bg-gold-dark transition">
-                      <UploadCloudIcon size={14} />
+                  <div className="mt-6">
+                    <span className="btn-primary rounded-full px-6 py-3 text-xs font-semibold shadow-xs inline-flex items-center gap-2 group-hover:bg-gold-dark transition">
                       <span>{isProcessingImages ? "Processando..." : "Selecionar fotos do computador"}</span>
                     </span>
                   </div>
 
-                  <p className="mt-3 text-[11px] text-taupe/70">
+                  <p className="mt-4 text-[11px] text-taupe/70">
                     JPG, PNG, WEBP (permite selecionar múltiplas fotos)
                   </p>
 
