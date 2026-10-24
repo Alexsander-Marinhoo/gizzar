@@ -4,7 +4,6 @@ import { AdminTab } from "./AdminNavbar";
 import {
   OrdersIcon,
   ProductsIcon,
-  BannerIcon,
   TruckIcon,
   ChevronRightIcon,
 } from "./AdminIcons";
@@ -15,7 +14,7 @@ interface AdminStatsGridProps {
   totalOrdersCount: number;
   pendingOrdersCount: number;
   productsCount: number;
-  bannerActive: boolean;
+  bannerActive?: boolean;
   setActiveTab: (tab: AdminTab) => void;
 }
 
@@ -24,7 +23,6 @@ export default function AdminStatsGrid({
   totalOrdersCount,
   pendingOrdersCount,
   productsCount,
-  bannerActive,
   setActiveTab,
 }: AdminStatsGridProps) {
   const stats = [
@@ -56,19 +54,10 @@ export default function AdminStatsGrid({
       onClick: () => setActiveTab("orders"),
       badge: pendingOrdersCount > 0 ? "Pendente" : undefined,
     },
-    {
-      id: "banner",
-      title: "Banner principal",
-      value: bannerActive ? "Ativo" : "Pausado",
-      subtitle: "Campanha Frete Grátis",
-      icon: BannerIcon,
-      actionText: "Configurar",
-      onClick: () => setActiveTab("banner"),
-    },
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
       {stats.map((stat) => {
         const Icon = stat.icon;
         return (
