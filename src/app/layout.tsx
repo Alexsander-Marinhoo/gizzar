@@ -2,10 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Cormorant_Garamond, Manrope } from "next/font/google";
 import "./globals.css";
 import { siteConfig } from "@/config/site";
-import AnnouncementBar from "@/components/layout/AnnouncementBar";
-import Header from "@/components/layout/Header";
-import Footer from "@/components/layout/Footer";
-import WhatsAppFloat from "@/components/layout/WhatsAppFloat";
+import StoreLayoutShell from "@/components/layout/StoreLayoutShell";
 
 const cormorant = Cormorant_Garamond({
   variable: "--font-cormorant",
@@ -49,16 +46,11 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   themeColor: "#faf7f2",
 };
-
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="pt-BR" className={`${cormorant.variable} ${manrope.variable}`}>
       <body className="flex min-h-dvh flex-col">
-        <AnnouncementBar />
-        <Header />
-        <main className="flex-1">{children}</main>
-        <Footer />
-        <WhatsAppFloat />
+        <StoreLayoutShell>{children}</StoreLayoutShell>
       </body>
     </html>
   );

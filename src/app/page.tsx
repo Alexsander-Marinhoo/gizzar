@@ -5,6 +5,7 @@ import { TrustStrip } from "@/components/ui/Trust";
 import { ArrowRightIcon, SparkleIcon, WhatsAppIcon } from "@/components/ui/Icons";
 import { getAllProducts, getFeaturedProducts } from "@/data/products";
 import { siteConfig, whatsappLink } from "@/config/site";
+import HomePromoBanner from "@/components/home/HomePromoBanner";
 
 export default function HomePage() {
   const allBags = getAllProducts();
@@ -16,23 +17,8 @@ export default function HomePage() {
       {/* H1 ACESSÍVEL PARA SEO */}
       <h1 className="sr-only">GIZZAR — Bolsas de luxo e acessórios com elegância atemporal</h1>
 
-      {/* BANNER PROMOCIONAL COMPACTO — IMAGEM DIRETA COM PUBLICIDADE FRETE GRÁTIS */}
-      <section className="container-page pt-3 sm:pt-4">
-        <Link
-          href="/catalogo"
-          aria-label="Campanha Promocional — Frete Grátis a partir de R$ 499,90"
-          className="group block relative overflow-hidden rounded-2xl sm:rounded-3xl bg-sand shadow-xs transition duration-300 hover:shadow-md aspect-[16/7] sm:aspect-[16/6] lg:aspect-[16/5.2] max-h-[380px] w-full"
-        >
-          <Image
-            src="/brand/sem titulo.jpg"
-            alt="GIZZAR — Frete Grátis a partir de R$ 499,90"
-            fill
-            priority
-            sizes="(min-width: 1280px) 1280px, 100vw"
-            className="object-cover object-center transition-transform duration-700 group-hover:scale-[1.01]"
-          />
-        </Link>
-      </section>
+      {/* BANNER PROMOCIONAL GERENCIÁVEL PELO PAINEL ADMIN */}
+      <HomePromoBanner />
 
 
       {/* BARRA DE CONFIANÇA */}
