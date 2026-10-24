@@ -47,6 +47,7 @@ export default function ProductGallery({ images, name }: { images: string[]; nam
                     alt=""
                     fill
                     sizes="80px"
+                    unoptimized={src.startsWith("data:") || src.startsWith("blob:")}
                     className="object-cover transition duration-300 group-hover:scale-105"
                   />
                   {isModelPhoto && (
@@ -72,6 +73,10 @@ export default function ProductGallery({ images, name }: { images: string[]; nam
               alt={`${name} — visualização`}
               fill
               priority
+              unoptimized={
+                currentDisplayImage?.startsWith("data:") ||
+                currentDisplayImage?.startsWith("blob:")
+              }
               sizes="(min-width: 768px) 50vw, 100vw"
               className="animate-fade-in object-cover transition-transform duration-500 group-hover:scale-[1.02]"
             />

@@ -142,6 +142,10 @@ export default function AdminProductsView({
                       src={product.images[0] || "/brand/hero.jpg"}
                       alt={product.name}
                       fill
+                      unoptimized={
+                        product.images[0]?.startsWith("data:") ||
+                        product.images[0]?.startsWith("blob:")
+                      }
                       className="object-cover object-center group-hover:scale-105 transition duration-700 ease-out"
                     />
                     <div className="absolute top-2.5 left-2.5 flex flex-col gap-1.5">
@@ -173,6 +177,25 @@ export default function AdminProductsView({
                     <p className="text-xs text-taupe mt-1 line-clamp-2 leading-relaxed">
                       {product.shortDescription}
                     </p>
+
+                    {/* Variações de cor do produto cadastradas */}
+                    {product.colors && product.colors.length > 0 && (
+                      <div className="flex items-center gap-1.5 mt-2.5">
+                        {product.colors.map((c, i) => (
+                          <span
+                            key={i}
+                            title={c.name}
+                            className="h-3.5 w-3.5 rounded-full border border-stone/80 ring-1 ring-ink/20 shadow-2xs"
+                            style={{ backgroundColor: c.hex }}
+                          />
+                        ))}
+                        <span className="text-[10px] text-taupe font-medium ml-1">
+                          {product.colors.length > 1
+                            ? `${product.colors.length} cores`
+                            : product.colors[0].name}
+                        </span>
+                      </div>
+                    )}
 
                     {/* Preço idêntico ao Anexo 1 */}
                     <div className="mt-3 pt-3 border-t border-stone/40">

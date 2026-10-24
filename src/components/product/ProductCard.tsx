@@ -20,6 +20,7 @@ export default function ProductCard({ product, priority = false }: { product: Pr
           alt={product.name}
           fill
           priority={priority}
+          unoptimized={cover?.startsWith("data:") || cover?.startsWith("blob:")}
           sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
           className={`object-cover transition duration-700 ease-out group-hover:scale-105 ${hover ? "group-hover:opacity-0" : ""}`}
         />
@@ -28,6 +29,7 @@ export default function ProductCard({ product, priority = false }: { product: Pr
             src={hover}
             alt=""
             fill
+            unoptimized={hover?.startsWith("data:") || hover?.startsWith("blob:")}
             sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
             className="object-cover opacity-0 transition duration-700 ease-out group-hover:scale-105 group-hover:opacity-100"
           />

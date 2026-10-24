@@ -15,6 +15,10 @@ export default function PurchasePanel({ product }: { product: Product }) {
   const panelRef = useRef<HTMLDivElement>(null);
   const soldOut = product.stock <= 0;
 
+  const [selectedColor, setSelectedColor] = useState(
+    product.colors?.[0]?.name || ""
+  );
+
   useEffect(() => {
     setMounted(true);
 
@@ -33,18 +37,32 @@ export default function PurchasePanel({ product }: { product: Product }) {
 
   return (
     <div ref={panelRef} className="space-y-6">
-      {product.colors && (
+      {product.colors && product.colors.length > 0 && (
         <div>
-          <p className="label">Cor: <span className="normal-case tracking-normal text-ink">{product.colors[0].name}</span></p>
-          <div className="flex gap-2">
-            {product.colors.map((c) => (
-              <span
-                key={c.name}
-                title={c.name}
-                className="h-9 w-9 rounded-full border-2 border-ivory ring-1 ring-ink"
-                style={{ backgroundColor: c.hex }}
-              />
-            ))}
+          <p className="label">
+            Cor:{" "}
+            <span className="normal-case tracking-normal text-ink font-semibold">
+              {selectedColor || product.colors[0].name}
+            </span>
+          </p>
+          <div className="flex flex-wrap gap-2 pt-1">
+            {product.colors.map((c) => {
+              const isSelected = (selectedColor || product.colors![0].name) === c.name;
+              return (
+                <button
+                  key={c.name}
+                  type="button"
+                  onClick={() => setSelectedColor(c.name)}
+                  title={c.name}
+                  className={`h-9 w-9 rounded-full border-2 border-ivory transition-all cursor-pointer ${
+                    isSelected
+                      ? "ring-2 ring-ink ring-offset-2 scale-105 shadow-xs"
+                      : "ring-1 ring-stone/70 opacity-80 hover:opacity-100 hover:scale-105"
+                  }`}
+                  style={{ backgroundColor: c.hex }}
+                />
+              );
+            })}
           </div>
         </div>
       )}
