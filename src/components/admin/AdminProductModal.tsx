@@ -38,17 +38,6 @@ const PRESET_PALETTES: ProductColor[] = [
   { name: "Marinho", hex: "#1A2B4C" },
 ];
 
-const AVAILABLE_PROJECT_IMAGES = [
-  { url: "/products/tote-noir.jpg", label: "Tote Noir" },
-  { url: "/products/crossbody-caramelo.jpg", label: "Crossbody Caramelo" },
-  { url: "/products/mini-perola.jpg", label: "Mini Pérola" },
-  { url: "/products/bucket-palha.jpg", label: "Bucket Palha" },
-  { url: "/products/hobo-bordo.jpg", label: "Hobo Bordô" },
-  { url: "/products/clutch-dourada.jpg", label: "Clutch Dourada" },
-  { url: "/products/baguette-oliva.jpg", label: "Baguette Oliva" },
-  { url: "/products/satchel-terracota.jpg", label: "Satchel Terracota" },
-  { url: "/products/flap-croco-noir.jpg", label: "Flap Croco Noir" },
-];
 
 /**
  * Converte e otimiza imagens locais da máquina para Base64 leve,
@@ -117,8 +106,6 @@ export default function AdminProductModal({
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [isProcessingImages, setIsProcessingImages] = useState(false);
-  const [showCatalogSelector, setShowCatalogSelector] = useState(false);
-  const [customImageUrl, setCustomImageUrl] = useState("");
 
   // CORES: Começa limpo com campo "Cor aqui" para o usuário digitar
   const [colors, setColors] = useState<ProductColor[]>(
@@ -538,74 +525,6 @@ export default function AdminProductModal({
                   </div>
                 </div>
               )}
-
-              {/* Opção secundária: Acervo demo ou URL externa */}
-              <div className="mt-4 pt-3 border-t border-stone/40">
-                <button
-                  type="button"
-                  onClick={() => setShowCatalogSelector(!showCatalogSelector)}
-                  className="text-xs font-semibold text-taupe hover:text-ink transition flex items-center gap-1.5 cursor-pointer"
-                >
-                  <EditIcon size={12} />
-                  <span>
-                    {showCatalogSelector
-                      ? "Ocultar acervo de exemplo"
-                      : "+ Ou escolher foto do acervo demo / URL externa"}
-                  </span>
-                </button>
-
-                {showCatalogSelector && (
-                  <div className="mt-3 p-4 rounded-2xl bg-sand/40 border border-stone/70 animate-fade-in space-y-3">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-taupe">
-                      Fotos de amostra do catálogo:
-                    </p>
-                    <div className="grid grid-cols-4 sm:grid-cols-5 gap-2">
-                      {AVAILABLE_PROJECT_IMAGES.map((item) => (
-                        <button
-                          key={item.url}
-                          type="button"
-                          onClick={() => {
-                            setImages((prev) => [...prev, item.url]);
-                            setShowCatalogSelector(false);
-                          }}
-                          className="relative aspect-[3/4] rounded-xl overflow-hidden border border-stone/60 opacity-70 hover:opacity-100 transition"
-                          title={item.label}
-                        >
-                          <Image
-                            src={item.url}
-                            alt={item.label}
-                            fill
-                            className="object-cover"
-                          />
-                        </button>
-                      ))}
-                    </div>
-
-                    <div className="pt-2 border-t border-stone/40 flex gap-2">
-                      <input
-                        type="text"
-                        value={customImageUrl}
-                        onChange={(e) => setCustomImageUrl(e.target.value)}
-                        placeholder="Ou cole uma URL externa de imagem..."
-                        className="input text-xs py-2 bg-white flex-1"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (customImageUrl.trim()) {
-                            setImages((prev) => [...prev, customImageUrl.trim()]);
-                            setCustomImageUrl("");
-                            setShowCatalogSelector(false);
-                          }
-                        }}
-                        className="btn-outline rounded-xl py-2 px-3 text-xs font-semibold"
-                      >
-                        Adicionar
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
             </div>
 
             {/* ============================================================
