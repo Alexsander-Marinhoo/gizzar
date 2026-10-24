@@ -531,15 +531,15 @@ export default function AdminProductModal({
                 COLUNA DIREITA: CONTEÚDO EDITÁVEL EM TEMPO REAL
                ============================================================ */}
             <div className="space-y-6">
-              {/* Etiquetas Novidade e Destaque */}
-              <div className="flex flex-wrap items-center gap-2">
+              {/* Etiquetas Novidade e Destaque com alto contraste */}
+              <div className="flex flex-wrap items-center gap-2.5">
                 <button
                   type="button"
                   onClick={() => setIsNew(!isNew)}
-                  className={`rounded-full px-3.5 py-1 text-[11px] font-semibold uppercase tracking-wider transition cursor-pointer ${
+                  className={`rounded-full px-4 py-1.5 text-[11px] font-bold uppercase tracking-wider transition cursor-pointer border ${
                     isNew
-                      ? "bg-ivory border border-stone text-ink shadow-2xs"
-                      : "bg-sand/40 text-taupe/70 hover:text-ink border border-transparent"
+                      ? "bg-ink border-ink text-ivory shadow-xs"
+                      : "bg-white border-stone text-ink hover:border-gold shadow-2xs"
                   }`}
                   title="Clique para ativar/desativar etiqueta Novidade"
                 >
@@ -549,10 +549,10 @@ export default function AdminProductModal({
                 <button
                   type="button"
                   onClick={() => setFeatured(!featured)}
-                  className={`rounded-full px-3.5 py-1 text-[11px] font-semibold uppercase tracking-wider transition cursor-pointer ${
+                  className={`rounded-full px-4 py-1.5 text-[11px] font-bold uppercase tracking-wider transition cursor-pointer border ${
                     featured
-                      ? "bg-ink text-gold-light shadow-2xs"
-                      : "bg-sand/40 text-taupe/70 hover:text-ink border border-transparent"
+                      ? "bg-gold border-gold text-ink font-extrabold shadow-xs"
+                      : "bg-white border-stone text-ink hover:border-gold shadow-2xs"
                   }`}
                   title="Clique para ativar/desativar etiqueta Destaque"
                 >
@@ -560,9 +560,9 @@ export default function AdminProductModal({
                 </button>
               </div>
 
-              {/* Título da Bolsa (Nome da bolsa aqui) */}
+              {/* Título da Bolsa (Nome da bolsa aqui - bem legível e escuro) */}
               <div className="group">
-                <label className="text-[11px] font-bold uppercase tracking-wider text-taupe block mb-1 group-hover:text-gold-dark transition">
+                <label className="text-[11px] font-bold uppercase tracking-wider text-ink/80 block mb-1 group-hover:text-gold-dark transition">
                   Nome da Bolsa (clique para digitar)
                 </label>
                 <input
@@ -570,14 +570,14 @@ export default function AdminProductModal({
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Nome da bolsa aqui"
-                  className="heading-display text-3xl sm:text-4xl text-ink font-medium bg-transparent border-b border-stone/50 hover:border-gold focus:border-gold outline-none w-full py-1 transition placeholder:text-stone/90 placeholder:italic placeholder:font-serif"
+                  className="heading-display text-3xl sm:text-4xl text-ink font-medium bg-transparent border-b border-stone/80 hover:border-gold focus:border-gold outline-none w-full py-1 transition placeholder:text-ink/60 placeholder:font-serif"
                   required
                 />
               </div>
 
-              {/* Frase de Destaque / Descrição Curta (Subtítulo) */}
+              {/* Frase de Destaque / Descrição Curta (Subtítulo - escuro e legível) */}
               <div className="group">
-                <label className="text-[11px] font-bold uppercase tracking-wider text-taupe block mb-1 group-hover:text-gold-dark transition">
+                <label className="text-[11px] font-bold uppercase tracking-wider text-ink/80 block mb-1 group-hover:text-gold-dark transition">
                   Frase de destaque (subtítulo)
                 </label>
                 <textarea
@@ -585,15 +585,15 @@ export default function AdminProductModal({
                   value={shortDescription}
                   onChange={(e) => setShortDescription(e.target.value)}
                   placeholder="Frase curta de destaque aqui (ex: Elegante e espaçosa para o seu dia a dia)..."
-                  className="text-sm text-ink bg-transparent border-b border-stone/50 hover:border-gold focus:border-gold outline-none w-full py-1 resize-none transition placeholder:text-stone/90 placeholder:italic"
+                  className="text-sm text-ink bg-transparent border-b border-stone/80 hover:border-gold focus:border-gold outline-none w-full py-1 resize-none transition placeholder:text-ink/60"
                 />
               </div>
 
-              {/* Bloco de Preço e Parcelamento (Valor aqui) */}
+              {/* Bloco de Preço e Parcelamento (Valor aqui - escuro e nítido) */}
               <div className="border-y border-stone/60 py-5 space-y-2">
                 <div className="flex flex-wrap items-baseline gap-4">
                   <div>
-                    <label className="text-[11px] font-bold uppercase tracking-wider text-taupe block mb-1">
+                    <label className="text-[11px] font-bold uppercase tracking-wider text-ink/80 block mb-1">
                       Preço de Venda
                     </label>
                     <div className="flex items-center gap-1.5">
@@ -608,17 +608,17 @@ export default function AdminProductModal({
                           )
                         }
                         placeholder="Valor aqui"
-                        className="text-2xl sm:text-3xl font-bold tracking-tight text-ink font-sans bg-transparent border-b border-stone/50 hover:border-gold focus:border-gold outline-none w-44 py-0.5 placeholder:text-stone/90 placeholder:font-normal placeholder:text-xl"
+                        className="text-2xl sm:text-3xl font-bold tracking-tight text-ink font-sans bg-transparent border-b border-stone/80 hover:border-gold focus:border-gold outline-none w-44 py-0.5 placeholder:text-ink/60 placeholder:font-bold placeholder:text-2xl"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="text-[11px] font-bold uppercase tracking-wider text-taupe block mb-1">
+                    <label className="text-[11px] font-bold uppercase tracking-wider text-ink/80 block mb-1">
                       Preço De (riscado - opcional)
                     </label>
                     <div className="flex items-center gap-1">
-                      <span className="text-xs text-taupe">R$</span>
+                      <span className="text-xs text-ink/80 font-semibold">R$</span>
                       <input
                         type="number"
                         step="0.10"
@@ -631,7 +631,7 @@ export default function AdminProductModal({
                           )
                         }
                         placeholder="Preço antigo aqui"
-                        className="text-sm text-taupe line-through bg-transparent border-b border-stone/50 hover:border-gold focus:border-gold outline-none w-36 py-0.5 placeholder:no-underline placeholder:text-stone/90"
+                        className="text-sm text-ink line-through bg-transparent border-b border-stone/80 hover:border-gold focus:border-gold outline-none w-36 py-0.5 placeholder:no-underline placeholder:text-ink/55"
                       />
                     </div>
                   </div>
@@ -656,7 +656,7 @@ export default function AdminProductModal({
                     </p>
                   </>
                 ) : (
-                  <p className="text-xs text-taupe/80 italic pt-1">
+                  <p className="text-xs text-ink/75 font-medium pt-1">
                     Digite o valor da bolsa no campo acima para calcular o parcelamento automaticamente.
                   </p>
                 )}
@@ -706,7 +706,7 @@ export default function AdminProductModal({
                     </button>
                   </div>
 
-                  {/* Input Pill com o nome da cor */}
+                  {/* Input Pill com o nome da cor - escuro e legível */}
                   <div className="relative">
                     <input
                       type="text"
@@ -715,7 +715,7 @@ export default function AdminProductModal({
                         handleUpdateColorName(selectedColorIndex, e.target.value)
                       }
                       placeholder="Cor aqui (ex: Preto, Caramelo...)"
-                      className="rounded-full border border-stone/80 bg-white px-4 py-2 text-xs font-semibold text-ink outline-none hover:border-gold focus:border-gold focus:ring-1 focus:ring-gold transition shadow-2xs min-w-[160px] sm:min-w-[200px] placeholder:text-stone/90 placeholder:font-normal placeholder:italic"
+                      className="rounded-full border border-stone bg-white px-4 py-2 text-xs font-semibold text-ink outline-none hover:border-gold focus:border-gold focus:ring-1 focus:ring-gold transition shadow-2xs min-w-[170px] sm:min-w-[210px] placeholder:text-ink/60 placeholder:font-medium"
                     />
                   </div>
 
@@ -732,7 +732,7 @@ export default function AdminProductModal({
                   )}
                 </div>
 
-                <p className="text-[11px] text-taupe">
+                <p className="text-xs text-ink/75 font-medium">
                   Clique na bolinha para trocar o tom ou escreva o nome da cor na caixinha ao lado.
                 </p>
 
@@ -908,14 +908,14 @@ export default function AdminProductModal({
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Escreva a descrição e história da peça aqui para suas clientes lerem..."
-                  className="text-sm leading-relaxed text-ink/80 bg-sand/30 p-4 rounded-2xl border border-stone/60 hover:border-gold focus:border-gold outline-none w-full transition resize-none placeholder:text-stone/90 placeholder:italic"
+                  className="text-sm leading-relaxed text-ink bg-white/95 p-4 rounded-2xl border border-stone/80 hover:border-gold focus:border-gold outline-none w-full transition resize-none placeholder:text-ink/60"
                 />
               </div>
 
               {/* Seção Detalhes e Especificações (Lista interativa) */}
               <div className="pt-4 border-t border-stone/50 space-y-3">
                 <div className="flex items-center justify-between">
-                  <h2 className="eyebrow">Especificações Técnicas</h2>
+                  <h2 className="eyebrow text-ink font-bold">Especificações Técnicas</h2>
                   <button
                     type="button"
                     onClick={handleAddDetail}
@@ -927,9 +927,9 @@ export default function AdminProductModal({
                 </div>
 
                 {details.length === 0 ? (
-                  <div className="rounded-2xl border border-dashed border-stone/80 bg-sand/30 p-4 text-center">
-                    <p className="text-xs font-medium text-ink">Nenhuma especificação adicionada ainda</p>
-                    <p className="text-[11px] text-taupe mt-1 max-w-sm mx-auto">
+                  <div className="rounded-2xl border border-dashed border-stone bg-white/80 p-4 text-center">
+                    <p className="text-xs font-semibold text-ink">Nenhuma especificação adicionada ainda</p>
+                    <p className="text-[11px] text-ink/70 mt-1 max-w-sm mx-auto">
                       Clique no botão <strong>"+ Adicionar item"</strong> acima para colocar medidas, tipo de material, alça, forro, etc.
                     </p>
                   </div>
@@ -938,14 +938,14 @@ export default function AdminProductModal({
                     {details.map((detail, index) => (
                       <div
                         key={index}
-                        className="flex items-center gap-2.5 bg-white p-2.5 rounded-xl border border-stone/60 group"
+                        className="flex items-center gap-2.5 bg-white p-2.5 rounded-xl border border-stone/80 group"
                       >
                         <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-gold" />
                         <input
                           type="text"
                           value={detail}
                           onChange={(e) => handleDetailChange(index, e.target.value)}
-                          className="text-xs text-ink/90 bg-transparent flex-1 outline-none"
+                          className="text-xs text-ink bg-transparent flex-1 outline-none placeholder:text-ink/60"
                           placeholder="Detalhe aqui (ex: Dimensões: 26 x 15 x 7 cm, Couro sintético...)"
                         />
                         <button
