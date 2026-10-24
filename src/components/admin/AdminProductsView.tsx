@@ -4,7 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { AdminProduct, deleteProduct } from "@/lib/admin-store";
-import { formatPrice, installmentLabel } from "@/lib/format";
+import PriceTag from "@/components/product/PriceTag";
 import { SearchIcon, EditIcon, TrashIcon, ExternalLinkIcon } from "./AdminIcons";
 import { PlusIcon } from "@/components/ui/Icons";
 import AdminProductModal from "./AdminProductModal";
@@ -114,7 +114,7 @@ export default function AdminProductsView({
         </div>
       </div>
 
-      {/* Grid de Produtos com Preço, Parcelamento e Badges idênticos ao anexo */}
+      {/* Grid de Produtos Idêntico ao /catalogo com cards limpos e elegantes */}
       {filtered.length === 0 ? (
         <div className="rounded-2xl border border-stone/70 bg-white p-12 text-center">
           <p className="text-lg font-bold text-ink">Nenhuma bolsa encontrada</p>
@@ -123,9 +123,8 @@ export default function AdminProductsView({
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-8 sm:gap-x-6 sm:gap-y-10">
           {filtered.map((product) => {
-            const installments = installmentLabel(product.price);
             const discount = product.compareAtPrice
               ? Math.round((1 - product.price / product.compareAtPrice) * 100)
               : null;
@@ -133,59 +132,118 @@ export default function AdminProductsView({
             return (
               <article
                 key={product.id}
-                className="rounded-2xl border border-stone/70 bg-white p-4 flex flex-col justify-between group hover:border-gold transition-all duration-300"
+                className="group relative flex flex-col"
               >
-                <div>
-                  {/* Foto aspecto 3/4 */}
-                  <div className="relative aspect-[3/4] w-full rounded-xl overflow-hidden bg-sand">
+                {/* Imagem Proporção 3:4 com cantos arredondados idênticos ao catálogo */}
+                <div className="relative aspect-[3/4] w-full overflow-hidden rounded-2xl sm:rounded-3xl bg-sand shadow-2xs">
+                  {/* Imagem Principal */}
+                  <Image
+                    src={product.images[0] || "/brand/hero.jpg"}
+                    alt={product.name}
+                    fill
+                    unoptimized={
+                      product.images[0]?.startsWith("data:") ||
+                      product.images[0]?.startsWith("blob:")
+                    }
+                    sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
+                    className={`object-cover object-center transition duration-700 ease-out group-hover:scale-105 ${
+                      product.images[1] ? "group-hover:opacity-0" : ""
+                    }`}
+                  />
+
+                  {/* Segunda Imagem no Hover (se houver) */}
+                  {product.images[1] && (
                     <Image
-                      src={product.images[0] || "/brand/hero.jpg"}
-                      alt={product.name}
+                      src={product.images[1]}
+                      alt=""
                       fill
                       unoptimized={
-                        product.images[0]?.startsWith("data:") ||
-                        product.images[0]?.startsWith("blob:")
+                        product.images[1]?.startsWith("data:") ||
+                        product.images[1]?.startsWith("blob:")
                       }
-                      className="object-cover object-center group-hover:scale-105 transition duration-700 ease-out"
+                      sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
+                      className="object-cover opacity-0 transition duration-700 ease-out group-hover:scale-105 group-hover:opacity-100"
                     />
-                    <div className="absolute top-2.5 left-2.5 flex flex-col gap-1.5">
-                      {product.isNew && (
-                        <span className="rounded-full bg-white/95 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-ink shadow-xs">
-                          Novo
-                        </span>
-                      )}
-                      {product.featured && (
-                        <span className="rounded-full bg-ink px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-gold-light shadow-xs">
-                          Destaque
-                        </span>
-                      )}
-                    </div>
+                  )}
 
-                    {/* Pílula de estoque parecida com seletor de quantidade */}
-                    <div className="absolute bottom-2.5 right-2.5">
-                      <span className="rounded-full border border-stone/80 bg-white/95 px-3 py-1 text-xs font-semibold text-ink shadow-xs">
-                        {product.stock} un
+                  {/* Badges empilhadas no canto superior esquerdo (idêntico ao catálogo) */}
+                  <div className="absolute left-2.5 top-2.5 sm:left-3 sm:top-3 flex flex-col gap-1 sm:gap-1.5 z-10 pointer-events-none">
+                    {product.isNew && (
+                      <span className="rounded-full bg-ivory/95 px-2.5 py-0.5 sm:px-3 sm:py-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.14em] text-ink shadow-2xs">
+                        NOVO
                       </span>
-                    </div>
+                    )}
+                    {discount && (
+                      <span className="rounded-full bg-ink px-2.5 py-0.5 sm:px-3 sm:py-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.14em] text-gold-light shadow-2xs">
+                        -{discount}%
+                      </span>
+                    )}
                   </div>
 
-                  {/* Informações de Produto com Preço e Parcelamento idênticos ao anexo */}
-                  <div className="mt-3.5 px-0.5">
-                    <h3 className="font-display text-lg sm:text-xl font-medium text-ink line-clamp-1 group-hover:text-gold-dark transition-colors">
-                      {product.name}
-                    </h3>
-                    <p className="text-xs text-taupe mt-1 line-clamp-2 leading-relaxed">
-                      {product.shortDescription}
-                    </p>
+                  {/* Pílula discreta de Estoque no canto superior direito */}
+                  <div className="absolute right-2.5 top-2.5 sm:right-3 sm:top-3 z-10">
+                    <span
+                      className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold shadow-xs backdrop-blur-xs ${
+                        product.stock > 0
+                          ? "bg-ivory/95 text-ink"
+                          : "bg-danger/90 text-white"
+                      }`}
+                    >
+                      {product.stock > 0 ? `${product.stock} un` : "Esgotado"}
+                    </span>
+                  </div>
 
-                    {/* Variações de cor do produto cadastradas */}
-                    {product.colors && product.colors.length > 0 && (
-                      <div className="flex items-center gap-1.5 mt-2.5">
+                  {/* Barra de Ações Rápidas no Hover sobre a foto */}
+                  <div className="absolute inset-x-2.5 bottom-2.5 sm:inset-x-3 sm:bottom-3 flex items-center gap-2 transition duration-300 md:translate-y-2 md:opacity-0 md:group-hover:translate-y-0 md:group-hover:opacity-100 z-20">
+                    <button
+                      type="button"
+                      onClick={() => handleOpenEdit(product)}
+                      className="btn-primary rounded-full px-4 py-2 text-xs font-semibold shadow-md flex-1 text-center cursor-pointer flex items-center justify-center gap-1.5"
+                    >
+                      <EditIcon size={13} />
+                      <span>Editar</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDelete(product)}
+                      className="h-8 w-8 rounded-full bg-white/95 backdrop-blur-md text-taupe hover:text-danger hover:bg-white shadow-md transition cursor-pointer flex items-center justify-center shrink-0"
+                      title="Excluir bolsa"
+                    >
+                      <TrashIcon size={14} />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Informações da Peça com Tipografia Idêntica ao Catálogo */}
+                <div className="mt-2.5 sm:mt-3.5 flex flex-1 flex-col px-0.5">
+                  {/* Título com fonte Serif Display */}
+                  <h3
+                    onClick={() => handleOpenEdit(product)}
+                    className="font-display text-[15px] sm:text-lg text-ink font-normal leading-snug tracking-normal transition hover:text-gold-dark line-clamp-1 cursor-pointer"
+                    title={product.name}
+                  >
+                    {product.name}
+                  </h3>
+
+                  {/* Preço e Parcelamento usando PriceTag oficial */}
+                  <div className="mt-1">
+                    <PriceTag
+                      price={product.price}
+                      compareAtPrice={product.compareAtPrice}
+                      size="sm"
+                    />
+                  </div>
+
+                  {/* Rodapé com cores e atalhos sutis */}
+                  <div className="mt-2.5 pt-2 border-t border-stone/30 flex items-center justify-between text-xs">
+                    {/* Swatches de cores */}
+                    {product.colors && product.colors.length > 0 ? (
+                      <div className="flex items-center gap-1">
                         {product.colors.map((c, i) => (
                           <span
                             key={i}
                             title={c.name}
-                            className="h-3.5 w-3.5 rounded-full border border-stone/80 ring-1 ring-ink/20 shadow-2xs"
+                            className="h-3 w-3 rounded-full border border-stone/80 ring-1 ring-ink/20 shadow-2xs"
                             style={{ backgroundColor: c.hex }}
                           />
                         ))}
@@ -195,69 +253,31 @@ export default function AdminProductsView({
                             : product.colors[0].name}
                         </span>
                       </div>
+                    ) : (
+                      <span className="text-[10px] text-taupe uppercase tracking-wider font-medium">
+                        {product.category}
+                      </span>
                     )}
 
-                    {/* Preço idêntico ao Anexo 1 */}
-                    <div className="mt-3 pt-3 border-t border-stone/40">
-                      <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-                        <span className="text-xl sm:text-2xl font-bold tracking-tight text-ink font-sans">
-                          {formatPrice(product.price)}
-                        </span>
-                        {product.compareAtPrice && (
-                          <>
-                            <span className="text-xs text-taupe line-through">
-                              {formatPrice(product.compareAtPrice)}
-                            </span>
-                            {discount && (
-                              <span className="rounded-full bg-gold/15 px-2 py-0.5 text-xs font-semibold text-gold-dark">
-                                -{discount}%
-                              </span>
-                            )}
-                          </>
-                        )}
-                      </div>
-
-                      {/* Parcelamento idêntico ao Anexo 1 */}
-                      {installments && (
-                        <p className="mt-1 text-xs text-taupe leading-tight">
-                          ou <span className="font-medium text-ink">{installments}</span>
-                        </p>
-                      )}
-                      <p className="mt-0.5 text-[11px] text-taupe">
-                        ou <span className="font-medium text-ink">à vista no Pix</span> com aprovação imediata
-                      </p>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => handleOpenEdit(product)}
+                        className="text-[11px] font-semibold text-ink hover:text-gold-dark transition cursor-pointer"
+                      >
+                        Editar
+                      </button>
+                      <span className="text-stone/60">·</span>
+                      <Link
+                        href={`/produto/${product.slug}`}
+                        target="_blank"
+                        className="text-[11px] text-taupe hover:text-ink transition flex items-center gap-1"
+                        title="Ver na loja pública"
+                      >
+                        <span>Ver</span>
+                        <ExternalLinkIcon size={11} />
+                      </Link>
                     </div>
-                  </div>
-                </div>
-
-                {/* Ações inferiores com botões pílula */}
-                <div className="mt-5 pt-3 border-t border-stone/40 flex items-center justify-between text-xs px-0.5">
-                  <Link
-                    href={`/produto/${product.slug}`}
-                    target="_blank"
-                    className="text-xs font-semibold text-taupe hover:text-ink transition flex items-center gap-1"
-                  >
-                    <span>Ver na loja</span>
-                    <ExternalLinkIcon size={12} />
-                  </Link>
-
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => handleOpenEdit(product)}
-                      className="btn-outline rounded-full px-4 py-1.5 text-xs font-semibold cursor-pointer"
-                    >
-                      Editar
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => handleDelete(product)}
-                      className="p-1.5 text-taupe hover:text-danger rounded-full hover:bg-sand transition cursor-pointer"
-                      title="Excluir bolsa"
-                    >
-                      <TrashIcon size={15} />
-                    </button>
                   </div>
                 </div>
               </article>
