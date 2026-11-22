@@ -8,6 +8,7 @@ import {
   setAdminSession,
   AdminSession,
 } from "@/lib/admin-store";
+import { verifySupabaseAdminCredentials } from "@/lib/supabase";
 import { LockIcon, MailIcon, ArrowRightIcon } from "@/components/ui/Icons";
 
 export default function AdminLoginPage() {
@@ -27,7 +28,7 @@ export default function AdminLoginPage() {
     }
   }, []);
 
-  const handleLogin = (e?: React.FormEvent) => {
+  const handleLogin = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     setError(null);
 
@@ -38,15 +39,24 @@ export default function AdminLoginPage() {
 
     setLoading(true);
 
-    setTimeout(() => {
-      try {
-        setAdminSession(email.trim(), "Alexsander Marinho");
-        router.push("/admin/dashboard");
-      } catch {
-        setError("Erro ao autenticar. Tente novamente.");
+    try {
+      const verified = await verifySupabaseAdminCredentials(
+        email.trim(),
+        password.trim()
+      );
+      if (!verified) {
+        setError(
+          "Credenciais inválidas. Verifique o e-mail e a senha (padrão: admin@gizzar.com.br / admin123)."
+        );
         setLoading(false);
+        return;
       }
-    }, 400);
+      setAdminSession(verified.email, verified.name);
+      router.push("/admin/dashboard");
+    } catch {
+      setError("Erro ao autenticar com o banco de dados. Tente novamente.");
+      setLoading(false);
+    }
   };
 
   const handleQuickDemo = () => {

@@ -49,8 +49,16 @@ export const categories: Category[] = [
     name: "Bolsas",
     description: "Modelos atemporais para todos os momentos.",
   },
-  // Próximas categorias:
-  // { id: "acessorios", name: "Acessórios", description: "..." },
+  {
+    id: "clutches",
+    name: "Clutches",
+    description: "Peças de mão sofisticadas para festas e ocasiões especiais.",
+  },
+  {
+    id: "acessorios",
+    name: "Acessórios",
+    description: "Complementos elegantes com acabamento premium.",
+  },
 ];
 
 export const products: Product[] = [
@@ -189,7 +197,7 @@ export const products: Product[] = [
     id: "gz-006",
     slug: "clutch-dourada",
     name: "Clutch Dourada",
-    category: "bolsas",
+    category: "clutches",
     price: 199.9,
     shortDescription: "Clutch de festa em cetim dourado com fecho de strass.",
     description:
@@ -289,26 +297,53 @@ export const products: Product[] = [
   },
 ];
 
-/* ---------- Helpers de consulta (troque por API/CMS no futuro) ---------- */
+/* ---------- Helpers de consulta sincronizados com o Supabase / Admin Store ---------- */
 
-export function getAllProducts() {
+function readLiveProducts(): Product[] {
+  if (typeof window !== "undefined") {
+    try {
+      const raw = window.localStorage.getItem("gizzar_admin_products");
+      if (raw) {
+        const parsed = JSON.parse(raw) as Product[];
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed;
+        }
+      }
+    } catch {
+      // Fallback para lista estática
+    }
+  }
   return products;
 }
 
-export function getProductBySlug(slug: string) {
-  return products.find((p) => p.slug === slug);
+export function getAllProducts(): Product[] {
+  return readLiveProducts();
 }
 
-export function getProductById(id: string) {
-  return products.find((p) => p.id === id);
+export function getProductBySlug(slug: string): Product | undefined {
+  const list = readLiveProducts();
+  return list.find((p) => p.slug === slug) ?? products.find((p) => p.slug === slug);
 }
 
-export function getFeaturedProducts() {
-  return products.filter((p) => p.featured);
+export function getProductById(id: string): Product | undefined {
+  const list = readLiveProducts();
+  return list.find((p) => p.id === id) ?? products.find((p) => p.id === id);
 }
 
-export function getRelatedProducts(product: Product, limit = 4) {
-  return products
-    .filter((p) => p.id !== product.id && p.category === product.category)
-    .slice(0, limit);
+export function getFeaturedProducts(): Product[] {
+  return readLiveProducts().filter((p) => p.featured);
+}
+
+export function getRelatedProducts(product: Product, limit = 4): Product[] {
+  const list = readLiveProducts();
+  const sameCategory = list.filter(
+    (p) => p.id !== product.id && p.category === product.category
+  );
+  if (sameCategory.length >= limit) {
+    return sameCategory.slice(0, limit);
+  }
+  const others = list.filter(
+    (p) => p.id !== product.id && p.category !== product.category
+  );
+  return [...sameCategory, ...others].slice(0, limit);
 }

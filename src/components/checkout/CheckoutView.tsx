@@ -6,6 +6,7 @@ import { useState } from "react";
 import { fetchShippingQuote } from "@/components/shipping/ShippingCalculator";
 import { ArrowLeftIcon, CardIcon, LockIcon, PixIcon, ShieldIcon } from "@/components/ui/Icons";
 import { useCart } from "@/lib/cart";
+import { createAdminOrder } from "@/lib/admin-store";
 import { formatCep, formatPhone, formatPrice, installmentLabel, onlyDigits } from "@/lib/format";
 import type { ShippingOption, ShippingQuote } from "@/lib/shipping";
 import { siteConfig } from "@/config/site";
@@ -81,6 +82,44 @@ export default function CheckoutView() {
       });
       const data = await res.json();
       if (!res.ok || !data.url) throw new Error(data.error ?? "Não foi possível iniciar o pagamento.");
+
+      // Registra o pedido no Supabase / Painel Admin
+      createAdminOrder({
+        id: data.orderNsu || `GZ-${Date.now().toString().slice(-4)}`,
+        date: new Date().toISOString(),
+        status: data.demo ? "paid" : "pending",
+        customer: {
+          name: form.name.trim(),
+          email: form.email.trim(),
+          phone: form.phone.trim(),
+          cpf: "Não informado",
+        },
+        shippingAddress: {
+          recipientName: form.name.trim(),
+          street: quote.address.street || "Endereço",
+          number: form.number.trim(),
+          complement: form.complement.trim() || undefined,
+          neighborhood: quote.address.neighborhood || "",
+          city: quote.address.city,
+          state: quote.address.state,
+          cep: form.cep,
+        },
+        shippingMethod: shipping.name,
+        shippingCost: shipping.free ? 0 : shipping.price,
+        items: items.map(({ product, quantity, color }) => ({
+          id: product.id,
+          slug: product.slug,
+          name: product.name,
+          price: product.price,
+          quantity,
+          image: product.images[0] || "/brand/hero.jpg",
+          color: color || product.colors?.[0]?.name,
+        })),
+        paymentMethod: "pix",
+        subtotal,
+        total,
+      });
+
       window.location.href = data.url;
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro inesperado.");
@@ -100,18 +139,32 @@ export default function CheckoutView() {
   const summary = (
     <div className="space-y-5">
       <ul className="space-y-4">
-        {items.map(({ product, quantity }) => (
-          <li key={product.id} className="flex items-center gap-4">
-            <div className="relative aspect-[3/4] w-14 shrink-0 overflow-hidden rounded-lg bg-sand">
-              <Image src={product.images[0]} alt={product.name} fill sizes="56px" className="object-cover" />
-              <span className="absolute -right-0 -top-0 flex h-5 min-w-5 items-center justify-center rounded-bl-lg bg-ink px-1 text-[10px] font-bold text-ivory">
-                {quantity}
-              </span>
-            </div>
-            <p className="flex-1 text-sm font-medium">{product.name}</p>
-            <p className="text-sm">{formatPrice(product.price * quantity)}</p>
-          </li>
-        ))}
+        {items.map(({ product, quantity, color }) => {
+          const displayColor = color || product.colors?.[0]?.name;
+          const imgSrc = product.images[0] || "/brand/hero.jpg";
+          return (
+            <li key={product.id} className="flex items-center gap-4">
+              <div className="relative aspect-[3/4] w-14 shrink-0 overflow-hidden rounded-lg bg-sand">
+                <Image
+                  src={imgSrc}
+                  alt={product.name}
+                  fill
+                  unoptimized={imgSrc.startsWith("data:") || imgSrc.startsWith("blob:")}
+                  sizes="56px"
+                  className="object-cover"
+                />
+                <span className="absolute -right-0 -top-0 flex h-5 min-w-5 items-center justify-center rounded-bl-lg bg-ink px-1 text-[10px] font-bold text-ivory">
+                  {quantity}
+                </span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium truncate">{product.name}</p>
+                {displayColor && <p className="text-xs text-taupe">Cor: {displayColor}</p>}
+              </div>
+              <p className="text-sm">{formatPrice(product.price * quantity)}</p>
+            </li>
+          );
+        })}
       </ul>
       <dl className="space-y-2.5 border-t border-stone/60 pt-5 text-sm">
         <div className="flex justify-between">

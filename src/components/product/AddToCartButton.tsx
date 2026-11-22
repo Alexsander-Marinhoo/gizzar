@@ -8,6 +8,7 @@ import { cartActions } from "@/lib/cart";
 type Props = {
   productId: string;
   quantity?: number;
+  color?: string;
   variant?: "full" | "compact" | "icon";
   /** Se true, adiciona e vai direto para o carrinho. */
   buyNow?: boolean;
@@ -19,6 +20,7 @@ type Props = {
 export default function AddToCartButton({
   productId,
   quantity = 1,
+  color,
   variant = "full",
   buyNow = false,
   disabled,
@@ -31,7 +33,7 @@ export default function AddToCartButton({
   function handleClick(e: React.MouseEvent) {
     e.preventDefault();
     e.stopPropagation();
-    cartActions.add(productId, quantity);
+    cartActions.add(productId, quantity, color);
     if (buyNow) {
       router.push("/carrinho");
       return;

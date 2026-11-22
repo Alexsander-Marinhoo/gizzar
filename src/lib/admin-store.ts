@@ -1,4 +1,14 @@
-import { products as defaultProducts, Product, Category, categories as defaultCategories } from "@/data/products";
+import { products as defaultProducts, Product } from "@/data/products";
+import {
+  deleteSupabaseProduct,
+  fetchSupabaseBanner,
+  fetchSupabaseOrders,
+  fetchSupabaseProducts,
+  patchSupabaseOrder,
+  upsertSupabaseBanner,
+  upsertSupabaseOrder,
+  upsertSupabaseProduct,
+} from "@/lib/supabase";
 
 export interface AdminProduct extends Product {
   createdAt?: string;
@@ -341,6 +351,22 @@ export function getStoredProducts(): AdminProduct[] {
   }
 }
 
+export async function syncProductsFromSupabase(): Promise<AdminProduct[]> {
+  const remote = await fetchSupabaseProducts();
+  if (remote && remote.length > 0) {
+    if (isBrowser()) {
+      const prevRaw = localStorage.getItem(STORAGE_KEYS.PRODUCTS);
+      const nextRaw = JSON.stringify(remote);
+      if (prevRaw !== nextRaw) {
+        localStorage.setItem(STORAGE_KEYS.PRODUCTS, nextRaw);
+        window.dispatchEvent(new Event("gizzar_products_updated"));
+      }
+    }
+    return remote;
+  }
+  return getStoredProducts();
+}
+
 export function saveProduct(product: AdminProduct): AdminProduct[] {
   if (!isBrowser()) return defaultProducts;
   const current = getStoredProducts();
@@ -348,16 +374,30 @@ export function saveProduct(product: AdminProduct): AdminProduct[] {
 
   let updated: AdminProduct[];
   const now = new Date().toISOString();
+  const productToSave: AdminProduct =
+    existingIdx >= 0
+      ? { ...product, updatedAt: now }
+      : { ...product, createdAt: now, updatedAt: now };
 
   if (existingIdx >= 0) {
     updated = [...current];
-    updated[existingIdx] = { ...product, updatedAt: now };
+    updated[existingIdx] = productToSave;
   } else {
-    updated = [{ ...product, createdAt: now, updatedAt: now }, ...current];
+    updated = [productToSave, ...current];
   }
 
-  localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(updated));
+  try {
+    localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(updated));
+  } catch (err) {
+    console.warn("[AdminStore] Falha ao salvar no localStorage:", err);
+  }
   window.dispatchEvent(new Event("gizzar_products_updated"));
+
+  // Persiste no Supabase em background
+  void upsertSupabaseProduct(productToSave).then(() => {
+    void syncProductsFromSupabase();
+  });
+
   return updated;
 }
 
@@ -365,8 +405,16 @@ export function deleteProduct(productId: string): AdminProduct[] {
   if (!isBrowser()) return defaultProducts;
   const current = getStoredProducts();
   const filtered = current.filter((p) => p.id !== productId);
-  localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(filtered));
+  try {
+    localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(filtered));
+  } catch {
+    // ignore
+  }
   window.dispatchEvent(new Event("gizzar_products_updated"));
+
+  // Remove do Supabase em background
+  void deleteSupabaseProduct(productId);
+
   return filtered;
 }
 
@@ -385,6 +433,22 @@ export function getStoredBannerConfig(): AdminBannerConfig {
   }
 }
 
+export async function syncBannerFromSupabase(): Promise<AdminBannerConfig> {
+  const remote = await fetchSupabaseBanner();
+  if (remote) {
+    if (isBrowser()) {
+      const prevRaw = localStorage.getItem(STORAGE_KEYS.BANNER);
+      const nextRaw = JSON.stringify(remote);
+      if (prevRaw !== nextRaw) {
+        localStorage.setItem(STORAGE_KEYS.BANNER, nextRaw);
+        window.dispatchEvent(new Event("gizzar_banner_updated"));
+      }
+    }
+    return remote;
+  }
+  return getStoredBannerConfig();
+}
+
 export function saveBannerConfig(config: Partial<AdminBannerConfig>): AdminBannerConfig {
   if (!isBrowser()) return DEFAULT_BANNER_CONFIG;
   const current = getStoredBannerConfig();
@@ -393,8 +457,16 @@ export function saveBannerConfig(config: Partial<AdminBannerConfig>): AdminBanne
     ...config,
     updatedAt: new Date().toISOString(),
   };
-  localStorage.setItem(STORAGE_KEYS.BANNER, JSON.stringify(updated));
+  try {
+    localStorage.setItem(STORAGE_KEYS.BANNER, JSON.stringify(updated));
+  } catch {
+    // ignore
+  }
   window.dispatchEvent(new Event("gizzar_banner_updated"));
+
+  // Persiste no Supabase
+  void upsertSupabaseBanner(updated);
+
   return updated;
 }
 
@@ -413,6 +485,41 @@ export function getStoredOrders(): AdminOrder[] {
   }
 }
 
+export async function syncOrdersFromSupabase(): Promise<AdminOrder[]> {
+  const remote = await fetchSupabaseOrders();
+  if (remote && remote.length > 0) {
+    if (isBrowser()) {
+      const prevRaw = localStorage.getItem(STORAGE_KEYS.ORDERS);
+      const nextRaw = JSON.stringify(remote);
+      if (prevRaw !== nextRaw) {
+        localStorage.setItem(STORAGE_KEYS.ORDERS, nextRaw);
+        window.dispatchEvent(new Event("gizzar_orders_updated"));
+      }
+    }
+    return remote;
+  }
+  return getStoredOrders();
+}
+
+export function createAdminOrder(order: AdminOrder): AdminOrder[] {
+  if (!isBrowser()) return DEFAULT_ORDERS;
+  const current = getStoredOrders();
+  const existingIdx = current.findIndex((o) => o.id === order.id);
+  const updated =
+    existingIdx >= 0
+      ? current.map((o, i) => (i === existingIdx ? order : o))
+      : [order, ...current];
+
+  try {
+    localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(updated));
+  } catch {
+    // ignore
+  }
+  window.dispatchEvent(new Event("gizzar_orders_updated"));
+  void upsertSupabaseOrder(order);
+  return updated;
+}
+
 export function updateOrderStatus(orderId: string, status: OrderStatus): AdminOrder[] {
   if (!isBrowser()) return DEFAULT_ORDERS;
   const current = getStoredOrders();
@@ -422,27 +529,51 @@ export function updateOrderStatus(orderId: string, status: OrderStatus): AdminOr
     }
     return order;
   });
-  localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(updated));
+  try {
+    localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(updated));
+  } catch {
+    // ignore
+  }
   window.dispatchEvent(new Event("gizzar_orders_updated"));
+  void patchSupabaseOrder(orderId, { status });
   return updated;
 }
 
 export function updateOrderTracking(orderId: string, trackingCode: string): AdminOrder[] {
   if (!isBrowser()) return DEFAULT_ORDERS;
   const current = getStoredOrders();
+  let newStatus: OrderStatus | undefined;
   const updated = current.map((order) => {
     if (order.id === orderId) {
+      newStatus = order.status === "paid" ? ("shipped" as OrderStatus) : order.status;
       return {
         ...order,
         trackingCode,
-        status: order.status === "paid" ? ("shipped" as OrderStatus) : order.status,
+        status: newStatus,
       };
     }
     return order;
   });
-  localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(updated));
+  try {
+    localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(updated));
+  } catch {
+    // ignore
+  }
   window.dispatchEvent(new Event("gizzar_orders_updated"));
+  void patchSupabaseOrder(orderId, {
+    tracking_code: trackingCode,
+    ...(newStatus ? { status: newStatus } : {}),
+  });
   return updated;
+}
+
+export async function syncAllWithSupabase() {
+  const [products, orders, banner] = await Promise.all([
+    syncProductsFromSupabase(),
+    syncOrdersFromSupabase(),
+    syncBannerFromSupabase(),
+  ]);
+  return { products, orders, banner };
 }
 
 // AUTH SESSION

@@ -3,9 +3,10 @@ import { getProductById } from "@/data/products";
 import { onlyDigits } from "@/lib/format";
 import { createInfinitePayCheckout, isInfinitePayConfigured, toCents } from "@/lib/infinitepay";
 import { quoteShipping, ShippingError, type ShippingItem } from "@/lib/shipping";
+import { fetchSupabaseProductById } from "@/lib/supabase";
 
 type CheckoutBody = {
-  items: ShippingItem[];
+  items: (ShippingItem & { color?: string })[];
   shippingOptionId: "pac" | "sedex";
   customer: { name: string; email: string; phone: string; cpf?: string };
   address: { cep: string; number: string; complement?: string };
@@ -25,13 +26,17 @@ export async function POST(request: Request) {
       return error("Preencha nome, e-mail e WhatsApp corretamente.");
     if (!address?.number?.trim()) return error("Informe o número do endereço.");
 
-    // Recalcula tudo no servidor — nunca confie em preços vindos do navegador.
-    const items = body.items.map((line) => {
-      const product = getProductById(line.productId);
-      if (!product) throw new ShippingError("Um dos produtos não está mais disponível.");
-      const quantity = Math.max(1, Math.min(product.stock, Math.floor(line.quantity)));
-      return { product, quantity };
-    });
+    // Recalcula tudo no servidor — busca tanto do catálogo local quanto do Supabase.
+    const items = await Promise.all(
+      body.items.map(async (line) => {
+        const product =
+          getProductById(line.productId) ??
+          (await fetchSupabaseProductById(line.productId));
+        if (!product) throw new ShippingError("Um dos produtos não está mais disponível.");
+        const quantity = Math.max(1, Math.min(product.stock, Math.floor(line.quantity)));
+        return { product, quantity, color: line.color };
+      })
+    );
 
     const quote = await quoteShipping(address.cep, body.items);
     const shipping = quote.options.find((o) => o.id === body.shippingOptionId) ?? quote.options[0];

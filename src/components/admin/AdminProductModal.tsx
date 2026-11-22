@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { AdminProduct, saveProduct } from "@/lib/admin-store";
+import { uploadImageToSupabaseStorage } from "@/lib/supabase";
 import { installmentLabel } from "@/lib/format";
 import {
   CloseIcon,
@@ -146,12 +147,18 @@ export default function AdminProductModal({
       ? Math.round((1 - numericPrice / numericCompareAt) * 100)
       : null;
 
-  // Processar arquivos enviados da máquina
+  // Processar arquivos enviados da máquina e salvar no bucket product-images do Supabase
   const handleFiles = async (fileList: FileList | null) => {
     if (!fileList || fileList.length === 0) return;
     setIsProcessingImages(true);
     try {
-      const promises = Array.from(fileList).map((file) => processImageFile(file));
+      const promises = Array.from(fileList).map(async (file) => {
+        const base64DataUrl = await processImageFile(file);
+        return uploadImageToSupabaseStorage(
+          base64DataUrl,
+          name.trim() || file.name.replace(/\.[^.]+$/, "") || "bolsa"
+        );
+      });
       const newUrls = await Promise.all(promises);
       setImages((prev) => [...prev, ...newUrls]);
       if (images.length === 0 && newUrls.length > 0) {

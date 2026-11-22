@@ -77,8 +77,8 @@ export default function PurchasePanel({ product }: { product: Product }) {
       )}
 
       <div className="grid gap-3">
-        <AddToCartButton id="buy-now-button" productId={product.id} quantity={quantity} buyNow disabled={soldOut} className="w-full py-4" />
-        <AddToCartButton id="add-to-cart-button" productId={product.id} quantity={quantity} disabled={soldOut} />
+        <AddToCartButton id="buy-now-button" productId={product.id} quantity={quantity} color={selectedColor} buyNow disabled={soldOut} className="w-full py-4" />
+        <AddToCartButton id="add-to-cart-button" productId={product.id} quantity={quantity} color={selectedColor} disabled={soldOut} />
       </div>
 
       <ShippingCalculator items={[{ productId: product.id, quantity }]} />
@@ -103,12 +103,14 @@ export default function PurchasePanel({ product }: { product: Product }) {
                 <AddToCartButton
                   productId={product.id}
                   quantity={quantity}
+                  color={selectedColor}
                   variant="icon"
                   className="h-10 w-10 border border-stone/70 bg-white text-ink shadow-xs"
                 />
                 <AddToCartButton
                   productId={product.id}
                   quantity={quantity}
+                  color={selectedColor}
                   buyNow
                   variant="compact"
                   className="px-5! py-3! text-xs font-semibold whitespace-nowrap"

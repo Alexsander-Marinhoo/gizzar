@@ -20,7 +20,7 @@ export const siteConfig = {
     email: "contato@gizzar.com.br",
     instagram: "https://instagram.com/gizzar",
     instagramHandle: "@gizzar",
-    city: "São Paulo — SP",
+    city: "Rio de Janeiro — RJ",
   },
 
   payment: {
@@ -33,12 +33,20 @@ export const siteConfig = {
   },
 
   shipping: {
-    /** CEP de origem (de onde as bolsas são enviadas). */
-    originCep: "01310-100",
+    /** CEP de origem (de onde as bolsas são enviadas — Rio de Janeiro/RJ). */
+    originCep: process.env.NEXT_PUBLIC_ORIGIN_CEP ?? "20040-002",
     /** Frete grátis a partir deste valor (R$). Use 0 para desativar. */
     freeShippingThreshold: 499,
     /** Dias de manuseio/postagem somados ao prazo dos Correios. */
     handlingDays: 1,
+    /**
+     * Multiplicador para cobrir a Tarifa de Balcão à Vista dos Correios
+     * quando a postagem é feita direto no guichê da agência sem contrato (ex.: 1.15 = +15%).
+     * Use 1 se for emitir etiqueta pré-paga pelo Melhor Envio / SuperFrete.
+     */
+    counterRateMultiplier: 1.15,
+    /** Custo adicional de caixa/embalagem somado ao frete (R$). Use 0 para desativar. */
+    packagingFee: 4.0,
   },
 
   announcement: [

@@ -7,12 +7,12 @@ import {
   getStoredProducts,
   getStoredOrders,
   getStoredBannerConfig,
+  syncAllWithSupabase,
   AdminProduct,
   AdminOrder,
   AdminBannerConfig,
   AdminSession,
   DEFAULT_BANNER_CONFIG,
-  setAdminSession,
 } from "@/lib/admin-store";
 import AdminNavbar, { AdminTab } from "@/components/admin/AdminNavbar";
 import AdminHeader from "@/components/admin/AdminHeader";
@@ -47,15 +47,18 @@ export default function AdminDashboardPage() {
   useEffect(() => {
     const currentSession = getAdminSession();
     if (!currentSession) {
-      // Se não tiver sessão no storage, inicializa sessão demo para conveniência
-      const demo = setAdminSession("admin@gizzar.com.br", "Alexsander Marinho");
-      setSession(demo);
-    } else {
-      setSession(currentSession);
+      router.replace("/admin");
+      return;
     }
+    setSession(currentSession);
     setLoadingSession(false);
 
     refreshData();
+    void syncAllWithSupabase().then(({ products: p, orders: o, banner: b }) => {
+      if (p) setProducts(p);
+      if (o) setOrders(o);
+      if (b) setBanner(b);
+    });
 
     const handleProductsUpdated = () => setProducts(getStoredProducts());
     const handleOrdersUpdated = () => setOrders(getStoredOrders());

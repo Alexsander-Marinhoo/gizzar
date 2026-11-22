@@ -7,6 +7,7 @@ import {
   AdminBannerConfig,
   DEFAULT_BANNER_CONFIG,
   getStoredBannerConfig,
+  syncBannerFromSupabase,
 } from "@/lib/admin-store";
 
 export default function HomePromoBanner() {
@@ -16,6 +17,9 @@ export default function HomePromoBanner() {
   useEffect(() => {
     setMounted(true);
     setBanner(getStoredBannerConfig());
+    void syncBannerFromSupabase().then((remote) => {
+      if (remote) setBanner(remote);
+    });
 
     const handleUpdate = () => {
       setBanner(getStoredBannerConfig());

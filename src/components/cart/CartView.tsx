@@ -50,34 +50,45 @@ export default function CartView() {
         )}
 
         <ul className="divide-y divide-stone/60 border-y border-stone/60">
-          {items.map(({ product, quantity }) => (
-            <li key={product.id} className="flex gap-4 py-6 sm:gap-6">
-              <Link href={`/produto/${product.slug}`} className="relative aspect-[3/4] w-24 shrink-0 overflow-hidden rounded-xl bg-sand sm:w-28">
-                <Image src={product.images[0]} alt={product.name} fill sizes="112px" className="object-cover" />
-              </Link>
-              <div className="flex min-w-0 flex-1 flex-col">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <Link href={`/produto/${product.slug}`} className="font-display text-xl leading-tight hover:text-gold-dark">
-                      {product.name}
-                    </Link>
-                    {product.colors && <p className="mt-1 text-xs text-taupe">Cor: {product.colors[0].name}</p>}
+          {items.map(({ product, quantity, color }) => {
+            const displayColor = color || product.colors?.[0]?.name;
+            const imgSrc = product.images[0] || "/brand/hero.jpg";
+            return (
+              <li key={product.id} className="flex gap-4 py-6 sm:gap-6">
+                <Link href={`/produto/${product.slug}`} className="relative aspect-[3/4] w-24 shrink-0 overflow-hidden rounded-xl bg-sand sm:w-28">
+                  <Image
+                    src={imgSrc}
+                    alt={product.name}
+                    fill
+                    unoptimized={imgSrc.startsWith("data:") || imgSrc.startsWith("blob:")}
+                    sizes="112px"
+                    className="object-cover"
+                  />
+                </Link>
+                <div className="flex min-w-0 flex-1 flex-col">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <Link href={`/produto/${product.slug}`} className="font-display text-xl leading-tight hover:text-gold-dark">
+                        {product.name}
+                      </Link>
+                      {displayColor && <p className="mt-1 text-xs text-taupe">Cor: {displayColor}</p>}
+                    </div>
+                    <button
+                      onClick={() => remove(product.id)}
+                      className="-mr-2 -mt-1 rounded-full p-2 text-taupe transition hover:bg-sand hover:text-danger"
+                      aria-label={`Remover ${product.name}`}
+                    >
+                      <TrashIcon size={18} />
+                    </button>
                   </div>
-                  <button
-                    onClick={() => remove(product.id)}
-                    className="-mr-2 -mt-1 rounded-full p-2 text-taupe transition hover:bg-sand hover:text-danger"
-                    aria-label={`Remover ${product.name}`}
-                  >
-                    <TrashIcon size={18} />
-                  </button>
+                  <div className="mt-auto flex items-end justify-between gap-3 pt-4">
+                    <QuantitySelector size="sm" value={quantity} max={product.stock} onChange={(q) => setQuantity(product.id, q)} />
+                    <p className="font-semibold">{formatPrice(product.price * quantity)}</p>
+                  </div>
                 </div>
-                <div className="mt-auto flex items-end justify-between gap-3 pt-4">
-                  <QuantitySelector size="sm" value={quantity} max={product.stock} onChange={(q) => setQuantity(product.id, q)} />
-                  <p className="font-semibold">{formatPrice(product.price * quantity)}</p>
-                </div>
-              </div>
-            </li>
-          ))}
+              </li>
+            );
+          })}
         </ul>
 
         <Link href="/catalogo" className="mt-6 inline-flex items-center gap-2 text-sm font-medium text-taupe hover:text-ink">
