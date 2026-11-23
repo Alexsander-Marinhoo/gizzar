@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { AdminProduct, saveProduct } from "@/lib/admin-store";
-import { uploadImageToSupabaseStorage } from "@/lib/supabase";
+import { ensureUuid, uploadImageToSupabaseStorage } from "@/lib/supabase";
 import { installmentLabel } from "@/lib/format";
 import {
   CloseIcon,
@@ -282,7 +282,7 @@ export default function AdminProductModal({
     }));
 
     const newProduct: AdminProduct = {
-      id: product?.id || `gz-${Date.now().toString().slice(-4)}`,
+      id: ensureUuid(product?.id),
       name: name.trim(),
       slug: generatedSlug,
       category,

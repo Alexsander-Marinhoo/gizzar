@@ -63,7 +63,7 @@ export const categories: Category[] = [
 
 export const products: Product[] = [
   {
-    id: "gz-001",
+    id: "00000000-0000-4000-8000-000000000001",
     slug: "bolsa-tote-noir",
     name: "Bolsa Tote Noir",
     category: "bolsas",
@@ -92,7 +92,7 @@ export const products: Product[] = [
     featured: true,
   },
   {
-    id: "gz-002",
+    id: "00000000-0000-4000-8000-000000000002",
     slug: "bolsa-transversal-caramelo",
     name: "Transversal Caramelo",
     category: "bolsas",
@@ -121,7 +121,7 @@ export const products: Product[] = [
     isNew: true,
   },
   {
-    id: "gz-003",
+    id: "00000000-0000-4000-8000-000000000003",
     slug: "mini-bag-perola",
     name: "Mini Bag Pérola",
     category: "bolsas",
@@ -146,7 +146,7 @@ export const products: Product[] = [
     isNew: true,
   },
   {
-    id: "gz-004",
+    id: "00000000-0000-4000-8000-000000000004",
     slug: "bucket-palha-natural",
     name: "Bucket Palha Natural",
     category: "bolsas",
@@ -169,7 +169,7 @@ export const products: Product[] = [
     stock: 15,
   },
   {
-    id: "gz-005",
+    id: "00000000-0000-4000-8000-000000000005",
     slug: "bolsa-hobo-bordo",
     name: "Hobo Bordô",
     category: "bolsas",
@@ -194,7 +194,7 @@ export const products: Product[] = [
     featured: true,
   },
   {
-    id: "gz-006",
+    id: "00000000-0000-4000-8000-000000000006",
     slug: "clutch-dourada",
     name: "Clutch Dourada",
     category: "clutches",
@@ -217,7 +217,7 @@ export const products: Product[] = [
     stock: 6,
   },
   {
-    id: "gz-007",
+    id: "00000000-0000-4000-8000-000000000007",
     slug: "bolsa-baguette-oliva",
     name: "Baguete Oliva",
     category: "bolsas",
@@ -244,7 +244,7 @@ export const products: Product[] = [
     isNew: true,
   },
   {
-    id: "gz-008",
+    id: "00000000-0000-4000-8000-000000000008",
     slug: "bolsa-satchel-terracota",
     name: "Satchel Terracota",
     category: "bolsas",
@@ -270,7 +270,7 @@ export const products: Product[] = [
     isNew: true,
   },
   {
-    id: "gz-009",
+    id: "00000000-0000-4000-8000-000000000009",
     slug: "bolsa-flap-croco-noir",
     name: "Flap Croco Noir",
     category: "bolsas",
@@ -302,7 +302,7 @@ export const products: Product[] = [
 function readLiveProducts(): Product[] {
   if (typeof window !== "undefined") {
     try {
-      const raw = window.localStorage.getItem("gizzar_admin_products");
+      const raw = window.localStorage.getItem("gizzar_admin_products_v2");
       if (raw) {
         const parsed = JSON.parse(raw) as Product[];
         if (Array.isArray(parsed) && parsed.length > 0) {

@@ -86,9 +86,24 @@ export function mapDbRowToProduct(row: DbProductRow): AdminProduct {
   };
 }
 
+const UUID_REGEX =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+export function ensureUuid(value?: string): string {
+  if (value && UUID_REGEX.test(value)) return value;
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID();
+  }
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === "x" ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
+
 function mapProductToDbRow(product: AdminProduct | Product) {
   return {
-    id: product.id,
+    id: ensureUuid(product.id),
     slug: product.slug,
     name: product.name,
     category: product.category || "bolsas",
@@ -140,9 +155,11 @@ function mapDbRowToBanner(row: DbBannerRow): AdminBannerConfig {
   };
 }
 
+export const DEFAULT_BANNER_UUID = "00000000-0000-4000-8000-000000000100";
+
 function mapBannerToDbRow(banner: AdminBannerConfig) {
   return {
-    id: banner.id || "banner-home-frete",
+    id: UUID_REGEX.test(banner.id) ? banner.id : DEFAULT_BANNER_UUID,
     active: banner.active,
     headline: banner.headline,
     subheadline: banner.subheadline,
@@ -195,7 +212,7 @@ function mapDbRowToOrder(row: DbOrderRow): AdminOrder {
 
 function mapOrderToDbRow(order: AdminOrder) {
   return {
-    id: order.id,
+    id: ensureUuid(order.id),
     date: order.date,
     status: order.status,
     customer: order.customer,
@@ -310,7 +327,7 @@ export async function deleteSupabaseProduct(productId: string): Promise<boolean>
 export async function fetchSupabaseBanner(): Promise<AdminBannerConfig | null> {
   try {
     const res = await fetch(
-      `${REST_URL}/banner_config?id=eq.banner-home-frete&select=*&limit=1`,
+      `${REST_URL}/banner_config?select=*&limit=1`,
       {
         method: "GET",
         headers: getHeaders(),

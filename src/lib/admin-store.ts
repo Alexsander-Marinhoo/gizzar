@@ -1,6 +1,8 @@
 import { products as defaultProducts, Product } from "@/data/products";
 import {
+  DEFAULT_BANNER_UUID,
   deleteSupabaseProduct,
+  ensureUuid,
   fetchSupabaseBanner,
   fetchSupabaseOrders,
   fetchSupabaseProducts,
@@ -89,14 +91,20 @@ export interface AdminSession {
 }
 
 const STORAGE_KEYS = {
-  PRODUCTS: "gizzar_admin_products",
-  ORDERS: "gizzar_admin_orders",
-  BANNER: "gizzar_admin_banner",
+  PRODUCTS: "gizzar_admin_products_v2",
+  ORDERS: "gizzar_admin_orders_v2",
+  BANNER: "gizzar_admin_banner_v2",
   SESSION: "gizzar_admin_session",
 };
 
+export function formatOrderNumber(id: string): string {
+  if (!id) return "GZ-0000";
+  if (id.toUpperCase().startsWith("GZ-")) return id.toUpperCase();
+  return `GZ-${id.replace(/-/g, "").slice(-4).toUpperCase()}`;
+}
+
 export const DEFAULT_BANNER_CONFIG: AdminBannerConfig = {
-  id: "banner-home-frete",
+  id: DEFAULT_BANNER_UUID,
   active: true,
   headline: "FRETE GRÁTIS",
   subheadline: "A PARTIR DE R$ 499,90",
@@ -111,7 +119,7 @@ export const DEFAULT_BANNER_CONFIG: AdminBannerConfig = {
 
 export const DEFAULT_ORDERS: AdminOrder[] = [
   {
-    id: "GZ-1048",
+    id: "00000000-0000-4000-8000-000000001048",
     date: "2026-10-24T12:45:00.000Z",
     status: "paid",
     customer: {
@@ -162,7 +170,7 @@ export const DEFAULT_ORDERS: AdminOrder[] = [
     notes: "Embalar para presente se possível.",
   },
   {
-    id: "GZ-1047",
+    id: "00000000-0000-4000-8000-000000001047",
     date: "2026-10-24T09:30:00.000Z",
     status: "paid",
     customer: {
@@ -200,7 +208,7 @@ export const DEFAULT_ORDERS: AdminOrder[] = [
     notes: "Cliente VIP. Enviar brinde perfume.",
   },
   {
-    id: "GZ-1046",
+    id: "00000000-0000-4000-8000-000000001046",
     date: "2026-10-23T15:20:00.000Z",
     status: "shipped",
     trackingCode: "NL819283719BR",
@@ -241,7 +249,7 @@ export const DEFAULT_ORDERS: AdminOrder[] = [
     total: 311.9,
   },
   {
-    id: "GZ-1045",
+    id: "00000000-0000-4000-8000-000000001045",
     date: "2026-10-22T11:00:00.000Z",
     status: "delivered",
     trackingCode: "BR992384712SP",
@@ -279,7 +287,7 @@ export const DEFAULT_ORDERS: AdminOrder[] = [
     total: 413.9,
   },
   {
-    id: "GZ-1044",
+    id: "00000000-0000-4000-8000-000000001044",
     date: "2026-10-21T16:15:00.000Z",
     status: "delivered",
     trackingCode: "BR771239841RJ",

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { AdminOrder, updateOrderStatus } from "@/lib/admin-store";
+import { AdminOrder, formatOrderNumber, updateOrderStatus } from "@/lib/admin-store";
 import { formatPrice } from "@/lib/format";
 import { SearchIcon, MapPinIcon, TruckIcon, EyeIcon, CopyIcon } from "./AdminIcons";
 import { WhatsAppIcon, CheckIcon } from "@/components/ui/Icons";
@@ -27,6 +27,7 @@ export default function AdminOrdersView({
       order.customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       order.customer.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
       order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      formatOrderNumber(order.id).toLowerCase().includes(searchTerm.toLowerCase()) ||
       order.shippingAddress.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
       order.shippingAddress.cep.includes(searchTerm) ||
       order.items.some((i) => i.name.toLowerCase().includes(searchTerm.toLowerCase()));
@@ -167,9 +168,10 @@ CEP: ${order.shippingAddress.cep}`;
         <div className="grid grid-cols-1 gap-5">
           {filteredOrders.map((order) => {
             const cleanPhone = order.customer.phone.replace(/\D/g, "");
+            const orderCode = formatOrderNumber(order.id);
             const whatsappUrl = `https://wa.me/55${cleanPhone}?text=Ol%C3%A1%20${encodeURIComponent(
               order.customer.name
-            )}!%20Aqui%20%C3%A9%20da%20GIZZAR%20sobre%20o%20seu%20pedido%20%23${order.id}.`;
+            )}!%20Aqui%20%C3%A9%20da%20GIZZAR%20sobre%20o%20seu%20pedido%20%23${orderCode}.`;
 
             return (
               <div
@@ -180,7 +182,7 @@ CEP: ${order.shippingAddress.cep}`;
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-stone/40">
                   <div className="flex flex-wrap items-center gap-3">
                     <span className="text-xl sm:text-2xl font-bold tracking-tight text-ink font-sans">
-                      Pedido #{order.id}
+                      Pedido #{orderCode}
                     </span>
                     <span className="text-xs text-taupe font-medium">
                       {new Date(order.date).toLocaleDateString("pt-BR", {

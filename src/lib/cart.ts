@@ -13,7 +13,7 @@ import { syncProductsFromSupabase } from "@/lib/admin-store";
 export type CartLine = { productId: string; quantity: number; color?: string };
 export type CartLineWithProduct = CartLine & { product: Product };
 
-const STORAGE_KEY = "gizzar-cart-v1";
+const STORAGE_KEY = "gizzar-cart-v2";
 const EMPTY: CartLine[] = [];
 
 let lines: CartLine[] = EMPTY;
@@ -45,7 +45,7 @@ function commit(next: CartLine[]) {
 function subscribe(listener: () => void) {
   listeners.add(listener);
   const onStorage = (e: StorageEvent) => {
-    if (e.key === STORAGE_KEY || e.key === "gizzar_admin_products") {
+    if (e.key === STORAGE_KEY || e.key === "gizzar_admin_products_v2") {
       loaded = false;
       load();
       listener();

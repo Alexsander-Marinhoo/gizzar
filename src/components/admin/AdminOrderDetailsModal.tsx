@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { AdminOrder, updateOrderStatus, updateOrderTracking } from "@/lib/admin-store";
+import { AdminOrder, formatOrderNumber, updateOrderStatus, updateOrderTracking } from "@/lib/admin-store";
 import { formatPrice } from "@/lib/format";
 import { CloseIcon, CheckIcon, WhatsAppIcon } from "@/components/ui/Icons";
 import {
@@ -61,9 +61,10 @@ CPF: ${order.customer.cpf}`;
   };
 
   const cleanPhone = order.customer.phone.replace(/\D/g, "");
+  const orderCode = formatOrderNumber(order.id);
   const whatsappUrl = `https://wa.me/55${cleanPhone}?text=Ol%C3%A1%20${encodeURIComponent(
     order.customer.name
-  )}!%20Aqui%20%C3%A9%20da%20GIZZAR%20sobre%20o%20seu%20pedido%20%23${order.id}.`;
+  )}!%20Aqui%20%C3%A9%20da%20GIZZAR%20sobre%20o%20seu%20pedido%20%23${orderCode}.`;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
@@ -81,7 +82,7 @@ CPF: ${order.customer.cpf}`;
             <p className="eyebrow">Ficha de expedição</p>
             <div className="flex items-center gap-3 mt-1">
               <span className="text-2xl sm:text-3xl font-bold tracking-tight text-ink font-sans">
-                Pedido #{order.id}
+                Pedido #{orderCode}
               </span>
               <span className="rounded-full bg-sand border border-stone/80 text-taupe px-3 py-0.5 text-xs font-semibold">
                 {new Date(order.date).toLocaleDateString("pt-BR", {

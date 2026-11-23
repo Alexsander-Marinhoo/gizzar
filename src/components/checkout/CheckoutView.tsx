@@ -7,6 +7,7 @@ import { fetchShippingQuote } from "@/components/shipping/ShippingCalculator";
 import { ArrowLeftIcon, CardIcon, LockIcon, PixIcon, ShieldIcon } from "@/components/ui/Icons";
 import { useCart } from "@/lib/cart";
 import { createAdminOrder } from "@/lib/admin-store";
+import { ensureUuid } from "@/lib/supabase";
 import { formatCep, formatPhone, formatPrice, installmentLabel, onlyDigits } from "@/lib/format";
 import type { ShippingOption, ShippingQuote } from "@/lib/shipping";
 import { siteConfig } from "@/config/site";
@@ -83,9 +84,9 @@ export default function CheckoutView() {
       const data = await res.json();
       if (!res.ok || !data.url) throw new Error(data.error ?? "Não foi possível iniciar o pagamento.");
 
-      // Registra o pedido no Supabase / Painel Admin
+      // Registra o pedido no Supabase / Painel Admin com ID UUID
       createAdminOrder({
-        id: data.orderNsu || `GZ-${Date.now().toString().slice(-4)}`,
+        id: ensureUuid(),
         date: new Date().toISOString(),
         status: data.demo ? "paid" : "pending",
         customer: {
