@@ -41,8 +41,8 @@ const PRESET_PALETTES: ProductColor[] = [
 
 
 /**
- * Converte e otimiza imagens locais da máquina para Base64 leve,
- * permitindo persistência imediata e visualização WYSIWYG perfeita.
+ * Converte e otimiza imagens locais da máquina para formato WebP super leve (poucos KB),
+ * reduzindo drasticamente o peso no bucket do Supabase Storage sem perder nitidez.
  */
 function processImageFile(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -52,7 +52,7 @@ function processImageFile(file: File): Promise<string> {
       const img = new window.Image();
       img.onerror = () => resolve(e.target?.result as string);
       img.onload = () => {
-        const maxDim = 1200;
+        const maxDim = 960;
         let width = img.width;
         let height = img.height;
         if (width > maxDim || height > maxDim) {
@@ -70,7 +70,12 @@ function processImageFile(file: File): Promise<string> {
         const ctx = canvas.getContext("2d");
         if (ctx) {
           ctx.drawImage(img, 0, 0, width, height);
-          resolve(canvas.toDataURL("image/jpeg", 0.88));
+          const webpDataUrl = canvas.toDataURL("image/webp", 0.76);
+          if (webpDataUrl.startsWith("data:image/webp")) {
+            resolve(webpDataUrl);
+          } else {
+            resolve(canvas.toDataURL("image/jpeg", 0.78));
+          }
         } else {
           resolve(e.target?.result as string);
         }
@@ -87,6 +92,8 @@ export default function AdminProductModal({
   onSaved,
 }: AdminProductModalProps) {
   const isEditing = Boolean(product);
+  // ID único do produto gerado logo na abertura para nomear a pasta no bucket do Supabase
+  const [productId] = useState<string>(() => ensureUuid(product?.id));
 
   // Campos limpos para cadastro fácil de pessoas leigas (sem dados fake pré-preenchidos)
   const [name, setName] = useState(product?.name || "");
@@ -147,16 +154,17 @@ export default function AdminProductModal({
       ? Math.round((1 - numericPrice / numericCompareAt) * 100)
       : null;
 
-  // Processar arquivos enviados da máquina e salvar no bucket product-images do Supabase
+  // Processar arquivos enviados da máquina (otimizados em WebP leve) e salvar na pasta <productId>/ do bucket product-images
   const handleFiles = async (fileList: FileList | null) => {
     if (!fileList || fileList.length === 0) return;
     setIsProcessingImages(true);
     try {
       const promises = Array.from(fileList).map(async (file) => {
-        const base64DataUrl = await processImageFile(file);
+        const webpDataUrl = await processImageFile(file);
         return uploadImageToSupabaseStorage(
-          base64DataUrl,
-          name.trim() || file.name.replace(/\.[^.]+$/, "") || "bolsa"
+          webpDataUrl,
+          productId,
+          name.trim() || file.name.replace(/\.[^.]+$/, "") || "foto"
         );
       });
       const newUrls = await Promise.all(promises);
@@ -282,7 +290,7 @@ export default function AdminProductModal({
     }));
 
     const newProduct: AdminProduct = {
-      id: ensureUuid(product?.id),
+      id: productId,
       name: name.trim(),
       slug: generatedSlug,
       category,

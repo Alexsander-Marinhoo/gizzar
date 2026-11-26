@@ -649,27 +649,35 @@ function dataUrlToBlob(dataUrl: string): { blob: Blob; ext: string; mime: string
 }
 
 /**
- * Faz upload de uma imagem para o bucket `product-images` no Supabase Storage
+ * Faz upload de uma imagem (convertida em WebP leve) para o bucket `product-images`
+ * dentro da pasta com o ID do produto (`<productId>/<nome>.webp`),
  * autenticada com o JWT do administrador logado (`TO authenticated`).
  */
 export async function uploadImageToSupabaseStorage(
   dataUrl: string,
-  prefix = "bolsa"
+  productId: string,
+  fileLabel = "foto"
 ): Promise<string> {
   try {
     const { blob, ext, mime } = dataUrlToBlob(dataUrl);
-    const cleanPrefix =
-      prefix
+    const folderId = ensureUuid(productId);
+    const cleanLabel =
+      fileLabel
         .toLowerCase()
         .normalize("NFD")
         .replace(/[\u0300-\u036f]/g, "")
         .replace(/[^a-z0-9]+/g, "-")
-        .replace(/(^-|-$)+/g, "") || "bolsa";
-    const filePath = `catalog/${cleanPrefix}-${Date.now()}-${Math.random()
+        .replace(/(^-|-$)+/g, "") || "foto";
+    const filePath = `${folderId}/${cleanLabel}-${Date.now()}-${Math.random()
       .toString(36)
-      .slice(2, 7)}.${ext}`;
+      .slice(2, 6)}.${ext}`;
 
-    const accessToken = getStoredAccessToken() || SUPABASE_ANON_KEY;
+    const accessToken = getStoredAccessToken();
+    if (!accessToken) {
+      throw new Error(
+        "Sessão expirada. Faça login novamente no painel para enviar imagens ao bucket."
+      );
+    }
 
     const res = await fetch(`${STORAGE_URL}/object/${BUCKET_NAME}/${filePath}`, {
       method: "POST",
@@ -683,13 +691,14 @@ export async function uploadImageToSupabaseStorage(
     });
 
     if (!res.ok) {
-      console.warn("[Supabase Storage] Fallback para Base64:", await res.text());
-      return dataUrl;
+      const errText = await res.text();
+      console.error("[Supabase Storage] Erro de permissão RLS no upload:", errText);
+      throw new Error("Não foi possível salvar a imagem no bucket do Supabase.");
     }
 
     return `${STORAGE_URL}/object/public/${BUCKET_NAME}/${filePath}`;
   } catch (err) {
-    console.warn("[Supabase Storage] Erro no upload, mantendo Base64:", err);
-    return dataUrl;
+    console.error("[Supabase Storage] Erro no upload:", err);
+    throw err;
   }
 }

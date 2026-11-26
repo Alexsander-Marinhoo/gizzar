@@ -20,7 +20,7 @@ export default function HomeCatalogSections({
     if (initialProducts && initialProducts.length > 0) {
       try {
         window.localStorage.setItem(
-          "gizzar_admin_products_v2",
+          "gizzar_admin_products_v4",
           JSON.stringify(initialProducts)
         );
       } catch {

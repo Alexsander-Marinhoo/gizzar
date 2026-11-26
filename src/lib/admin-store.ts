@@ -94,9 +94,9 @@ export interface AdminSession {
 }
 
 const STORAGE_KEYS = {
-  PRODUCTS: "gizzar_admin_products_v2",
-  ORDERS: "gizzar_admin_orders_v2",
-  BANNER: "gizzar_admin_banner_v2",
+  PRODUCTS: "gizzar_admin_products_v4",
+  ORDERS: "gizzar_admin_orders_v4",
+  BANNER: "gizzar_admin_banner_v4",
   SESSION: "gizzar_admin_session_v2",
 };
 
@@ -145,21 +145,21 @@ export const DEFAULT_ORDERS: AdminOrder[] = [
     shippingCost: 28.5,
     items: [
       {
-        id: "gz-001",
+        id: "00000000-0000-4000-8000-000000000001",
         slug: "bolsa-tote-noir",
         name: "Bolsa Tote Noir",
         price: 459.9,
         quantity: 1,
-        image: "/products/tote-noir.jpg",
+        image: "https://ffqbjycwxlsiwetszepk.supabase.co/storage/v1/object/public/product-images/products/tote-noir.jpg",
         color: "Preto",
       },
       {
-        id: "gz-006",
+        id: "00000000-0000-4000-8000-000000000006",
         slug: "clutch-dourada",
         name: "Clutch Dourada",
         price: 199.9,
         quantity: 1,
-        image: "/products/clutch-dourada.jpg",
+        image: "https://ffqbjycwxlsiwetszepk.supabase.co/storage/v1/object/public/product-images/products/clutch-dourada.jpg",
         color: "Dourado",
       },
     ],

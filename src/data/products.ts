@@ -61,6 +61,9 @@ export const categories: Category[] = [
   },
 ];
 
+const STORAGE_BUCKET_BASE =
+  "https://ffqbjycwxlsiwetszepk.supabase.co/storage/v1/object/public/product-images";
+
 export const products: Product[] = [
   {
     id: "00000000-0000-4000-8000-000000000001",
@@ -81,10 +84,10 @@ export const products: Product[] = [
     ],
     colors: [{ name: "Preto", hex: "#141210" }],
     images: [
-      "/products/tote-noir.jpg",
-      "/products/angles/tote-noir-side.jpg",
-      "/products/angles/tote-noir-detail.jpg",
-      "/products/angles/tote-noir-back.jpg",
+      `${STORAGE_BUCKET_BASE}/00000000-0000-4000-8000-000000000001/tote-noir.webp`,
+      `${STORAGE_BUCKET_BASE}/00000000-0000-4000-8000-000000000001/tote-noir-side.webp`,
+      `${STORAGE_BUCKET_BASE}/00000000-0000-4000-8000-000000000001/tote-noir-detail.webp`,
+      `${STORAGE_BUCKET_BASE}/00000000-0000-4000-8000-000000000001/tote-noir-back.webp`,
     ],
     weightKg: 0.9,
     dimensionsCm: { length: 40, width: 32, height: 15 },
@@ -109,10 +112,10 @@ export const products: Product[] = [
     ],
     colors: [{ name: "Caramelo", hex: "#A8642F" }],
     images: [
-      "/products/crossbody-caramelo.jpg",
-      "/products/angles/crossbody-caramelo-side.jpg",
-      "/products/angles/crossbody-caramelo-detail.jpg",
-      "/products/angles/crossbody-caramelo-back.jpg",
+      `${STORAGE_BUCKET_BASE}/00000000-0000-4000-8000-000000000002/crossbody-caramelo.webp`,
+      `${STORAGE_BUCKET_BASE}/00000000-0000-4000-8000-000000000002/crossbody-caramelo-side.webp`,
+      `${STORAGE_BUCKET_BASE}/00000000-0000-4000-8000-000000000002/crossbody-caramelo-detail.webp`,
+      `${STORAGE_BUCKET_BASE}/00000000-0000-4000-8000-000000000002/crossbody-caramelo-back.webp`,
     ],
     weightKg: 0.5,
     dimensionsCm: { length: 25, width: 18, height: 10 },
@@ -136,9 +139,7 @@ export const products: Product[] = [
       "Dimensões: 18 x 14 x 8 cm",
     ],
     colors: [{ name: "Pérola", hex: "#EDE6DA" }],
-    images: [
-      "/products/mini-perola.jpg",
-    ],
+    images: [`${STORAGE_BUCKET_BASE}/00000000-0000-4000-8000-000000000003/mini-perola.webp`],
     weightKg: 0.4,
     dimensionsCm: { length: 22, width: 18, height: 12 },
     stock: 8,
@@ -161,9 +162,7 @@ export const products: Product[] = [
       "Dimensões: 24 x 26 x 18 cm",
     ],
     colors: [{ name: "Natural", hex: "#D2B48C" }],
-    images: [
-      "/products/bucket-palha.jpg",
-    ],
+    images: [`${STORAGE_BUCKET_BASE}/00000000-0000-4000-8000-000000000004/bucket-palha.webp`],
     weightKg: 0.5,
     dimensionsCm: { length: 28, width: 28, height: 20 },
     stock: 15,
@@ -185,9 +184,7 @@ export const products: Product[] = [
       "Dimensões: 34 x 26 x 10 cm",
     ],
     colors: [{ name: "Bordô", hex: "#4A1520" }],
-    images: [
-      "/products/hobo-bordo.jpg",
-    ],
+    images: [`${STORAGE_BUCKET_BASE}/00000000-0000-4000-8000-000000000005/hobo-bordo.webp`],
     weightKg: 0.7,
     dimensionsCm: { length: 36, width: 30, height: 12 },
     stock: 10,
@@ -209,9 +206,7 @@ export const products: Product[] = [
       "Dimensões: 20 x 12 x 5 cm",
     ],
     colors: [{ name: "Dourado", hex: "#C9A961" }],
-    images: [
-      "/products/clutch-dourada.jpg",
-    ],
+    images: [`${STORAGE_BUCKET_BASE}/00000000-0000-4000-8000-000000000006/clutch-dourada.webp`],
     weightKg: 0.3,
     dimensionsCm: { length: 24, width: 16, height: 8 },
     stock: 6,
@@ -234,9 +229,7 @@ export const products: Product[] = [
       "Alça de ombro anatômica",
     ],
     colors: [{ name: "Verde Oliva", hex: "#556B2F" }],
-    images: [
-      "/products/baguette-oliva.jpg",
-    ],
+    images: [`${STORAGE_BUCKET_BASE}/00000000-0000-4000-8000-000000000007/baguette-oliva.webp`],
     weightKg: 0.45,
     dimensionsCm: { length: 28, width: 16, height: 8 },
     stock: 14,
@@ -260,9 +253,7 @@ export const products: Product[] = [
       "Dimensões: 28 x 22 x 11 cm",
     ],
     colors: [{ name: "Terracota", hex: "#B85D36" }],
-    images: [
-      "/products/satchel-terracota.jpg",
-    ],
+    images: [`${STORAGE_BUCKET_BASE}/00000000-0000-4000-8000-000000000008/satchel-terracota.webp`],
     weightKg: 0.8,
     dimensionsCm: { length: 32, width: 25, height: 14 },
     stock: 9,
@@ -286,9 +277,7 @@ export const products: Product[] = [
       "Dimensões: 24 x 16 x 7 cm",
     ],
     colors: [{ name: "Preto Croco", hex: "#121212" }],
-    images: [
-      "/products/flap-croco-noir.jpg",
-    ],
+    images: [`${STORAGE_BUCKET_BASE}/00000000-0000-4000-8000-000000000009/flap-croco-noir.webp`],
     weightKg: 0.6,
     dimensionsCm: { length: 26, width: 18, height: 10 },
     stock: 11,
@@ -302,7 +291,7 @@ export const products: Product[] = [
 function readLiveProducts(): Product[] {
   if (typeof window !== "undefined") {
     try {
-      const raw = window.localStorage.getItem("gizzar_admin_products_v2");
+      const raw = window.localStorage.getItem("gizzar_admin_products_v4");
       if (raw) {
         const parsed = JSON.parse(raw) as Product[];
         if (Array.isArray(parsed) && parsed.length > 0) {

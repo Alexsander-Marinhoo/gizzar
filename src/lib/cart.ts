@@ -45,7 +45,7 @@ function commit(next: CartLine[]) {
 function subscribe(listener: () => void) {
   listeners.add(listener);
   const onStorage = (e: StorageEvent) => {
-    if (e.key === STORAGE_KEY || e.key === "gizzar_admin_products_v2") {
+    if (e.key === STORAGE_KEY || e.key === "gizzar_admin_products_v4") {
       loaded = false;
       load();
       listener();
