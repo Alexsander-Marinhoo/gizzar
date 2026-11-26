@@ -3,6 +3,7 @@
 import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
+  clearAdminSession,
   getAdminSession,
   getStoredProducts,
   getStoredOrders,
@@ -14,6 +15,7 @@ import {
   AdminSession,
   DEFAULT_BANNER_CONFIG,
 } from "@/lib/admin-store";
+import { verifySupabaseAuthSession } from "@/lib/supabase";
 import AdminNavbar, { AdminTab } from "@/components/admin/AdminNavbar";
 import AdminHeader from "@/components/admin/AdminHeader";
 import AdminStatsGrid from "@/components/admin/AdminStatsGrid";
@@ -50,14 +52,23 @@ export default function AdminDashboardPage() {
       router.replace("/admin");
       return;
     }
-    setSession(currentSession);
-    setLoadingSession(false);
 
-    refreshData();
-    void syncAllWithSupabase().then(({ products: p, orders: o, banner: b }) => {
-      if (p) setProducts(p);
-      if (o) setOrders(o);
-      if (b) setBanner(b);
+    // Valida o JWT com o servidor do Supabase Auth (/auth/v1/user)
+    void verifySupabaseAuthSession(currentSession).then((verifiedSession) => {
+      if (!verifiedSession) {
+        clearAdminSession();
+        router.replace("/admin");
+        return;
+      }
+      setSession(verifiedSession);
+      setLoadingSession(false);
+
+      refreshData();
+      void syncAllWithSupabase().then(({ products: p, orders: o, banner: b }) => {
+        if (p) setProducts(p);
+        if (o) setOrders(o);
+        if (b) setBanner(b);
+      });
     });
 
     const handleProductsUpdated = () => setProducts(getStoredProducts());

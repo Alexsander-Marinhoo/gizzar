@@ -16,9 +16,19 @@ export default function HomeCatalogSections({
   const [allBags, setAllBags] = useState<Product[]>(initialProducts);
 
   useEffect(() => {
-    setAllBags(getStoredProducts());
+    // Prioriza os dados vindos do Supabase no servidor e atualiza em tempo real
+    if (initialProducts && initialProducts.length > 0) {
+      try {
+        window.localStorage.setItem(
+          "gizzar_admin_products_v2",
+          JSON.stringify(initialProducts)
+        );
+      } catch {
+        // ignore
+      }
+    }
     void syncProductsFromSupabase().then((remote) => {
-      if (remote && remote.length > 0) setAllBags(remote);
+      if (remote) setAllBags(remote);
     });
 
     const handleUpdate = () => setAllBags(getStoredProducts());

@@ -4,11 +4,14 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
+  clearAdminSession,
   getAdminSession,
-  setAdminSession,
   AdminSession,
 } from "@/lib/admin-store";
-import { verifySupabaseAdminCredentials } from "@/lib/supabase";
+import {
+  signInWithSupabaseAuth,
+  verifySupabaseAuthSession,
+} from "@/lib/supabase";
 import { LockIcon, MailIcon, ArrowRightIcon } from "@/components/ui/Icons";
 
 export default function AdminLoginPage() {
@@ -19,12 +22,20 @@ export default function AdminLoginPage() {
   const [rememberMe, setRememberMe] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [existingSession, setExistingSession] = useState<AdminSession | null>(null);
+  const [existingSession, setExistingSession] = useState<AdminSession | null>(
+    null
+  );
 
   useEffect(() => {
-    const session = getAdminSession();
-    if (session) {
-      setExistingSession(session);
+    const localSession = getAdminSession();
+    if (localSession) {
+      void verifySupabaseAuthSession(localSession).then((valid) => {
+        if (valid) {
+          setExistingSession(valid);
+        } else {
+          clearAdminSession();
+        }
+      });
     }
   }, []);
 
@@ -40,34 +51,34 @@ export default function AdminLoginPage() {
     setLoading(true);
 
     try {
-      const verified = await verifySupabaseAdminCredentials(
-        email.trim(),
-        password.trim()
-      );
-      if (!verified) {
-        setError(
-          "Credenciais inválidas. Verifique o e-mail e a senha (padrão: admin@gizzar.com.br / admin123)."
-        );
-        setLoading(false);
-        return;
-      }
-      setAdminSession(verified.email, verified.name);
+      await signInWithSupabaseAuth(email.trim(), password.trim());
       router.push("/admin/dashboard");
-    } catch {
-      setError("Erro ao autenticar com o banco de dados. Tente novamente.");
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Credenciais inválidas no Supabase Auth."
+      );
       setLoading(false);
     }
   };
 
-  const handleQuickDemo = () => {
+  const handleQuickDemo = async () => {
     setEmail("admin@gizzar.com.br");
     setPassword("admin123");
     setError(null);
     setLoading(true);
-    setTimeout(() => {
-      setAdminSession("admin@gizzar.com.br", "Alexsander Marinho");
+    try {
+      await signInWithSupabaseAuth("admin@gizzar.com.br", "admin123");
       router.push("/admin/dashboard");
-    }, 350);
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Erro ao autenticar com o Supabase Auth."
+      );
+      setLoading(false);
+    }
   };
 
   return (
@@ -95,7 +106,8 @@ export default function AdminLoginPage() {
         {existingSession && (
           <div className="mb-6 rounded-2xl border border-stone/80 bg-sand/60 p-4 text-center backdrop-blur-sm animate-fade-in">
             <p className="text-xs text-taupe">
-              Sessão iniciada como <strong className="text-ink">{existingSession.email}</strong>
+              Sessão autenticada via Supabase Auth como{" "}
+              <strong className="text-ink">{existingSession.email}</strong>
             </p>
             <div className="mt-2.5 flex items-center justify-center gap-4">
               <Link
@@ -107,13 +119,14 @@ export default function AdminLoginPage() {
               <button
                 type="button"
                 onClick={() => {
+                  clearAdminSession();
                   setExistingSession(null);
                   setEmail("");
                   setPassword("");
                 }}
-                className="text-xs text-taupe underline hover:text-ink transition"
+                className="text-xs text-taupe underline hover:text-ink transition cursor-pointer"
               >
-                Trocar conta
+                Encerrar sessão
               </button>
             </div>
           </div>
@@ -122,13 +135,13 @@ export default function AdminLoginPage() {
         <div className="card p-8 sm:p-10 shadow-[0_8px_30px_rgba(22,20,18,0.04)]">
           {/* Cabeçalho */}
           <div className="text-center">
-            <p className="eyebrow">Acesso Restrito</p>
+            <p className="eyebrow">Supabase Auth &bull; Acesso Seguro</p>
             <h1 className="heading-display mt-2 text-3xl sm:text-4xl text-ink font-medium">
               Painel de Controle
             </h1>
             <div className="gold-line mx-auto mt-3" />
             <p className="mt-3 text-xs text-taupe leading-relaxed">
-              Gestão da vitrine, inventário e pedidos do atelier.
+              Gestão protegida da vitrine, inventário e pedidos do atelier.
             </p>
           </div>
 
@@ -167,7 +180,7 @@ export default function AdminLoginPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="text-[11px] font-semibold text-taupe hover:text-ink transition uppercase tracking-wider"
+                  className="text-[11px] font-semibold text-taupe hover:text-ink transition uppercase tracking-wider cursor-pointer"
                 >
                   {showPassword ? "Ocultar" : "Mostrar"}
                 </button>
@@ -198,7 +211,9 @@ export default function AdminLoginPage() {
                 />
                 <span className="text-xs text-taupe">Manter conectado</span>
               </label>
-              <span className="text-[11px] text-taupe/70 font-mono">admin123</span>
+              <span className="text-[11px] text-taupe/70 font-mono">
+                admin123
+              </span>
             </div>
 
             <button
@@ -207,18 +222,19 @@ export default function AdminLoginPage() {
               disabled={loading}
               className="btn-primary w-full mt-3 py-3.5 text-sm font-semibold rounded-full cursor-pointer shadow-xs"
             >
-              {loading ? "Acessando..." : "Entrar no painel"}
+              {loading ? "Autenticando no Supabase..." : "Entrar no painel"}
             </button>
           </form>
 
-          {/* Acesso Demo em 1 clique */}
+          {/* Acesso Rápido Autenticado */}
           <div className="mt-6 pt-5 border-t border-stone/50 text-center">
             <button
               type="button"
+              disabled={loading}
               onClick={handleQuickDemo}
               className="btn-outline w-full py-2.5 px-4 text-xs font-semibold rounded-full cursor-pointer"
             >
-              Entrar com 1 clique (Administrador Master)
+              Entrar com 1 clique (Supabase Auth)
             </button>
           </div>
         </div>

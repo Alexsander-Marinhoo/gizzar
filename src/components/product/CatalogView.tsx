@@ -19,9 +19,18 @@ export default function CatalogView({
   const [sort, setSort] = useState<Sort>("featured");
 
   useEffect(() => {
-    setProducts(getStoredProducts());
+    if (initialProducts && initialProducts.length > 0) {
+      try {
+        window.localStorage.setItem(
+          "gizzar_admin_products_v2",
+          JSON.stringify(initialProducts)
+        );
+      } catch {
+        // ignore
+      }
+    }
     void syncProductsFromSupabase().then((remote) => {
-      if (remote && remote.length > 0) setProducts(remote);
+      if (remote) setProducts(remote);
     });
 
     const handleUpdate = () => setProducts(getStoredProducts());

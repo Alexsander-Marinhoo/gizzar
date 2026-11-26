@@ -2,10 +2,22 @@ import { TrustStrip } from "@/components/ui/Trust";
 import { WhatsAppIcon } from "@/components/ui/Icons";
 import { products as defaultProducts } from "@/data/products";
 import { siteConfig, whatsappLink } from "@/config/site";
+import { DEFAULT_BANNER_CONFIG } from "@/lib/admin-store";
+import { fetchSupabaseBanner, fetchSupabaseProducts } from "@/lib/supabase";
 import HomePromoBanner from "@/components/home/HomePromoBanner";
 import HomeCatalogSections from "@/components/home/HomeCatalogSections";
 
-export default function HomePage() {
+export const dynamic = "force-dynamic";
+
+export default async function HomePage() {
+  const [dbProducts, dbBanner] = await Promise.all([
+    fetchSupabaseProducts(),
+    fetchSupabaseBanner(),
+  ]);
+
+  const initialProducts = dbProducts ?? defaultProducts;
+  const initialBanner = dbBanner ?? DEFAULT_BANNER_CONFIG;
+
   return (
     <>
       {/* H1 ACESSÍVEL PARA SEO */}
@@ -13,16 +25,16 @@ export default function HomePage() {
         GIZZAR — Bolsas de luxo e acessórios com elegância atemporal
       </h1>
 
-      {/* BANNER PROMOCIONAL GERENCIÁVEL PELO PAINEL ADMIN / SUPABASE */}
-      <HomePromoBanner />
+      {/* BANNER PROMOCIONAL DO BANCO DE DADOS SUPABASE */}
+      <HomePromoBanner initialBanner={initialBanner} />
 
       {/* BARRA DE CONFIANÇA */}
       <div className="mt-4 sm:mt-5">
         <TrustStrip />
       </div>
 
-      {/* VITRINE & EDITORIAL SINCRONIZADOS COM O SUPABASE */}
-      <HomeCatalogSections initialProducts={defaultProducts} />
+      {/* VITRINE & EDITORIAL DIRETO DO BANCO DE DADOS SUPABASE */}
+      <HomeCatalogSections initialProducts={initialProducts} />
 
       {/* MANIFESTO */}
       <section className="container-page mt-14 sm:mt-20 text-center">

@@ -10,13 +10,16 @@ import {
   syncBannerFromSupabase,
 } from "@/lib/admin-store";
 
-export default function HomePromoBanner() {
-  const [banner, setBanner] = useState<AdminBannerConfig>(DEFAULT_BANNER_CONFIG);
+export default function HomePromoBanner({
+  initialBanner = DEFAULT_BANNER_CONFIG,
+}: {
+  initialBanner?: AdminBannerConfig;
+}) {
+  const [banner, setBanner] = useState<AdminBannerConfig>(initialBanner);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
-    setBanner(getStoredBannerConfig());
     void syncBannerFromSupabase().then((remote) => {
       if (remote) setBanner(remote);
     });
@@ -38,7 +41,6 @@ export default function HomePromoBanner() {
     return null;
   }
 
-  // Se o banner for o padrão ou possuir uma imagem direta
   const isDirectImage =
     banner.imageUrl === "/brand/sem titulo.jpg" ||
     banner.imageUrl === "/brand/banner-frete-gratis.jpg" ||
@@ -60,7 +62,6 @@ export default function HomePromoBanner() {
           className="object-cover object-center transition-transform duration-700 group-hover:scale-[1.01]"
         />
 
-        {/* Overlay elegante caso o banner tenha headline ou textos personalizados customizados diferentes do padrão direto */}
         {mounted && !isDirectImage && (banner.headline || banner.subheadline) && (
           <div className="absolute inset-0 bg-gradient-to-r from-sand/90 via-sand/70 to-transparent p-6 sm:p-10 lg:p-14 flex flex-col justify-center max-w-xl">
             {banner.tag && (

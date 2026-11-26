@@ -1,6 +1,6 @@
 /**
  * ============================================================
- *  CLIENTE SUPABASE (PostgREST + Storage) — GIZZAR
+ *  CLIENTE SUPABASE (Auth JWT + PostgREST + Storage) — GIZZAR
  *  Projeto: ffqbjycwxlsiwetszepk (sa-east-1)
  * ============================================================
  */
@@ -10,6 +10,7 @@ import type {
   AdminBannerConfig,
   AdminOrder,
   AdminProduct,
+  AdminSession,
   OrderStatus,
 } from "@/lib/admin-store";
 
@@ -22,16 +23,240 @@ export const SUPABASE_ANON_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZmcWJqeWN3eGxzaXdldHN6ZXBrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTUzNTcyNDAsImV4cCI6MjExMDkzMzI0MH0.XOaU-k_akj69AKlZFqDLq2-xFCF0V2N9NrxWydcpfIQ";
 
 const REST_URL = `${SUPABASE_URL}/rest/v1`;
+const AUTH_URL = `${SUPABASE_URL}/auth/v1`;
 const STORAGE_URL = `${SUPABASE_URL}/storage/v1`;
 const BUCKET_NAME = "product-images";
+const SESSION_STORAGE_KEY = "gizzar_admin_session_v2";
 
-function getHeaders(extra?: Record<string, string>): Record<string, string> {
+const UUID_REGEX =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+export const DEFAULT_BANNER_UUID = "00000000-0000-4000-8000-000000000100";
+
+export function ensureUuid(value?: string): string {
+  if (value && UUID_REGEX.test(value)) return value;
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID();
+  }
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === "x" ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
+
+/**
+ * Obtém o JWT de autenticação do Supabase Auth salvo na sessão do administrador,
+ * caso esteja no navegador. Operações de escrita (INSERT, UPDATE, DELETE) exigem
+ * este token devido às políticas de RLS (`TO authenticated`).
+ */
+function getStoredAccessToken(): string | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(SESSION_STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as AdminSession;
+    return parsed?.token || null;
+  } catch {
+    return null;
+  }
+}
+
+function getHeaders(
+  options?: { requireAuth?: boolean; extra?: Record<string, string> }
+): Record<string, string> {
+  const accessToken = getStoredAccessToken();
+  const bearer =
+    options?.requireAuth && accessToken ? accessToken : accessToken || SUPABASE_ANON_KEY;
+
   return {
     apikey: SUPABASE_ANON_KEY,
-    Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+    Authorization: `Bearer ${bearer}`,
     "Content-Type": "application/json",
-    ...extra,
+    ...options?.extra,
   };
+}
+
+/* ---------------- SUPABASE AUTH (GoTrue JWT) ---------------- */
+
+export interface SupabaseAuthResponse {
+  access_token: string;
+  token_type: string;
+  expires_in: number;
+  expires_at?: number;
+  refresh_token: string;
+  user: {
+    id: string;
+    email?: string;
+    user_metadata?: {
+      name?: string;
+      role?: string;
+    };
+    app_metadata?: {
+      role?: string;
+    };
+  };
+}
+
+/**
+ * Realiza login oficial no Supabase Auth (`/auth/v1/token?grant_type=password`).
+ * Retorna a sessão com o JWT real assinado pelo Supabase (`authenticated`).
+ */
+export async function signInWithSupabaseAuth(
+  email: string,
+  password: string
+): Promise<AdminSession> {
+  const res = await fetch(`${AUTH_URL}/token?grant_type=password`, {
+    method: "POST",
+    headers: {
+      apikey: SUPABASE_ANON_KEY,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      email: email.trim().toLowerCase(),
+      password,
+    }),
+  });
+
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || !data.access_token) {
+    const msg =
+      data?.msg ||
+      data?.error_description ||
+      data?.error ||
+      "E-mail ou senha inválidos.";
+    throw new Error(
+      msg === "Invalid login credentials"
+        ? "E-mail ou senha incorretos."
+        : msg
+    );
+  }
+
+  const authData = data as SupabaseAuthResponse;
+  const session: AdminSession = {
+    userId: authData.user.id,
+    email: authData.user.email || email.trim().toLowerCase(),
+    name: authData.user.user_metadata?.name || "Administrador GIZZAR",
+    role:
+      authData.user.user_metadata?.role ||
+      authData.user.app_metadata?.role ||
+      "Administrador Master",
+    token: authData.access_token,
+    refreshToken: authData.refresh_token,
+    expiresAt:
+      authData.expires_at ||
+      Math.floor(Date.now() / 1000) + (authData.expires_in || 3600),
+    loggedInAt: new Date().toISOString(),
+  };
+
+  if (typeof window !== "undefined") {
+    window.localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(session));
+  }
+
+  return session;
+}
+
+/**
+ * Renova o token JWT no Supabase Auth usando o `refresh_token`.
+ */
+export async function refreshSupabaseAuthSession(
+  refreshToken: string
+): Promise<AdminSession | null> {
+  try {
+    const res = await fetch(`${AUTH_URL}/token?grant_type=refresh_token`, {
+      method: "POST",
+      headers: {
+        apikey: SUPABASE_ANON_KEY,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ refresh_token: refreshToken }),
+    });
+    if (!res.ok) return null;
+    const authData = (await res.json()) as SupabaseAuthResponse;
+    if (!authData.access_token) return null;
+
+    const session: AdminSession = {
+      userId: authData.user.id,
+      email: authData.user.email || "admin@gizzar.com.br",
+      name: authData.user.user_metadata?.name || "Administrador GIZZAR",
+      role:
+        authData.user.user_metadata?.role ||
+        authData.user.app_metadata?.role ||
+        "Administrador Master",
+      token: authData.access_token,
+      refreshToken: authData.refresh_token,
+      expiresAt:
+        authData.expires_at ||
+        Math.floor(Date.now() / 1000) + (authData.expires_in || 3600),
+      loggedInAt: new Date().toISOString(),
+    };
+
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(session));
+    }
+    return session;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Valida se o JWT atual ainda é aceito pelo servidor do Supabase Auth (`/auth/v1/user`).
+ * Se estiver expirado e houver `refreshToken`, tenta renovar automaticamente.
+ */
+export async function verifySupabaseAuthSession(
+  session: AdminSession | null
+): Promise<AdminSession | null> {
+  if (!session?.token) return null;
+
+  const nowSec = Math.floor(Date.now() / 1000);
+  if (session.expiresAt && session.expiresAt - nowSec < 60 && session.refreshToken) {
+    const refreshed = await refreshSupabaseAuthSession(session.refreshToken);
+    if (refreshed) return refreshed;
+  }
+
+  try {
+    const res = await fetch(`${AUTH_URL}/user`, {
+      method: "GET",
+      headers: {
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${session.token}`,
+      },
+      cache: "no-store",
+    });
+
+    if (res.ok) {
+      const user = await res.json();
+      if (user?.id) return session;
+    }
+
+    if (session.refreshToken) {
+      return await refreshSupabaseAuthSession(session.refreshToken);
+    }
+    return null;
+  } catch {
+    return session;
+  }
+}
+
+/**
+ * Encerra a sessão no Supabase Auth (`/auth/v1/logout`).
+ */
+export async function signOutFromSupabaseAuth(token?: string): Promise<void> {
+  const jwt = token || getStoredAccessToken();
+  if (jwt) {
+    try {
+      await fetch(`${AUTH_URL}/logout`, {
+        method: "POST",
+        headers: {
+          apikey: SUPABASE_ANON_KEY,
+          Authorization: `Bearer ${jwt}`,
+        },
+      });
+    } catch {
+      // ignore network error on logout
+    }
+  }
 }
 
 /* ---------------- Mapeadores Postgres (snake_case <-> camelCase) ---------------- */
@@ -84,21 +309,6 @@ export function mapDbRowToProduct(row: DbProductRow): AdminProduct {
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
-}
-
-const UUID_REGEX =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
-export function ensureUuid(value?: string): string {
-  if (value && UUID_REGEX.test(value)) return value;
-  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
-    return crypto.randomUUID();
-  }
-  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
-    const r = (Math.random() * 16) | 0;
-    const v = c === "x" ? r : (r & 0x3) | 0x8;
-    return v.toString(16);
-  });
 }
 
 function mapProductToDbRow(product: AdminProduct | Product) {
@@ -154,8 +364,6 @@ function mapDbRowToBanner(row: DbBannerRow): AdminBannerConfig {
     updatedAt: row.updated_at || new Date().toISOString(),
   };
 }
-
-export const DEFAULT_BANNER_UUID = "00000000-0000-4000-8000-000000000100";
 
 function mapBannerToDbRow(banner: AdminBannerConfig) {
   return {
@@ -290,12 +498,15 @@ export async function upsertSupabaseProduct(product: AdminProduct): Promise<Admi
     const res = await fetch(`${REST_URL}/products?on_conflict=id`, {
       method: "POST",
       headers: getHeaders({
-        Prefer: "resolution=merge-duplicates,return=representation",
+        requireAuth: true,
+        extra: {
+          Prefer: "resolution=merge-duplicates,return=representation",
+        },
       }),
       body: JSON.stringify(payload),
     });
     if (!res.ok) {
-      console.error("[Supabase] Erro ao salvar produto:", await res.text());
+      console.error("[Supabase] Erro ao salvar produto (verifique login Auth):", await res.text());
       return null;
     }
     const rows = (await res.json()) as DbProductRow[];
@@ -312,7 +523,7 @@ export async function deleteSupabaseProduct(productId: string): Promise<boolean>
       `${REST_URL}/products?id=eq.${encodeURIComponent(productId)}`,
       {
         method: "DELETE",
-        headers: getHeaders(),
+        headers: getHeaders({ requireAuth: true }),
       }
     );
     return res.ok;
@@ -326,14 +537,11 @@ export async function deleteSupabaseProduct(productId: string): Promise<boolean>
 
 export async function fetchSupabaseBanner(): Promise<AdminBannerConfig | null> {
   try {
-    const res = await fetch(
-      `${REST_URL}/banner_config?select=*&limit=1`,
-      {
-        method: "GET",
-        headers: getHeaders(),
-        cache: "no-store",
-      }
-    );
+    const res = await fetch(`${REST_URL}/banner_config?select=*&limit=1`, {
+      method: "GET",
+      headers: getHeaders(),
+      cache: "no-store",
+    });
     if (!res.ok) return null;
     const rows = (await res.json()) as DbBannerRow[];
     return rows[0] ? mapDbRowToBanner(rows[0]) : null;
@@ -350,7 +558,10 @@ export async function upsertSupabaseBanner(
     const res = await fetch(`${REST_URL}/banner_config?on_conflict=id`, {
       method: "POST",
       headers: getHeaders({
-        Prefer: "resolution=merge-duplicates,return=representation",
+        requireAuth: true,
+        extra: {
+          Prefer: "resolution=merge-duplicates,return=representation",
+        },
       }),
       body: JSON.stringify(payload),
     });
@@ -385,7 +596,10 @@ export async function upsertSupabaseOrder(order: AdminOrder): Promise<AdminOrder
     const res = await fetch(`${REST_URL}/orders?on_conflict=id`, {
       method: "POST",
       headers: getHeaders({
-        Prefer: "resolution=merge-duplicates,return=representation",
+        requireAuth: true,
+        extra: {
+          Prefer: "resolution=merge-duplicates,return=representation",
+        },
       }),
       body: JSON.stringify(payload),
     });
@@ -406,7 +620,7 @@ export async function patchSupabaseOrder(
       `${REST_URL}/orders?id=eq.${encodeURIComponent(orderId)}`,
       {
         method: "PATCH",
-        headers: getHeaders(),
+        headers: getHeaders({ requireAuth: true }),
         body: JSON.stringify({
           ...patch,
           updated_at: new Date().toISOString(),
@@ -417,55 +631,6 @@ export async function patchSupabaseOrder(
   } catch {
     return false;
   }
-}
-
-/* ---------------- AUTENTICAÇÃO ADMIN (Supabase Database) ---------------- */
-
-export async function verifySupabaseAdminCredentials(
-  email: string,
-  password: string
-): Promise<{ email: string; name: string; role: string } | null> {
-  const cleanEmail = email.trim().toLowerCase();
-  try {
-    const res = await fetch(
-      `${REST_URL}/admin_users?email=eq.${encodeURIComponent(cleanEmail)}&select=email,name,password_hash,role&limit=1`,
-      {
-        method: "GET",
-        headers: getHeaders(),
-        cache: "no-store",
-      }
-    );
-    if (res.ok) {
-      const rows = (await res.json()) as Array<{
-        email: string;
-        name: string;
-        password_hash: string;
-        role: string;
-      }>;
-      if (rows[0]) {
-        if (rows[0].password_hash === password) {
-          return {
-            email: rows[0].email,
-            name: rows[0].name,
-            role: rows[0].role,
-          };
-        }
-        return null;
-      }
-    }
-  } catch {
-    // Fallback local se offline
-  }
-
-  if (cleanEmail === "admin@gizzar.com.br" && password === "admin123") {
-    return {
-      email: "admin@gizzar.com.br",
-      name: "Alexsander Marinho",
-      role: "Administrador Master",
-    };
-  }
-
-  return null;
 }
 
 /* ---------------- STORAGE DE FOTOS (Supabase Bucket product-images) ---------------- */
@@ -484,8 +649,8 @@ function dataUrlToBlob(dataUrl: string): { blob: Blob; ext: string; mime: string
 }
 
 /**
- * Faz upload de uma imagem (DataURL otimizado ou File) para o bucket `product-images`
- * no Supabase Storage e retorna a URL pública permanente.
+ * Faz upload de uma imagem para o bucket `product-images` no Supabase Storage
+ * autenticada com o JWT do administrador logado (`TO authenticated`).
  */
 export async function uploadImageToSupabaseStorage(
   dataUrl: string,
@@ -493,21 +658,24 @@ export async function uploadImageToSupabaseStorage(
 ): Promise<string> {
   try {
     const { blob, ext, mime } = dataUrlToBlob(dataUrl);
-    const cleanPrefix = prefix
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/(^-|-$)+/g, "") || "bolsa";
+    const cleanPrefix =
+      prefix
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)+/g, "") || "bolsa";
     const filePath = `catalog/${cleanPrefix}-${Date.now()}-${Math.random()
       .toString(36)
       .slice(2, 7)}.${ext}`;
+
+    const accessToken = getStoredAccessToken() || SUPABASE_ANON_KEY;
 
     const res = await fetch(`${STORAGE_URL}/object/${BUCKET_NAME}/${filePath}`, {
       method: "POST",
       headers: {
         apikey: SUPABASE_ANON_KEY,
-        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+        Authorization: `Bearer ${accessToken}`,
         "Content-Type": mime,
         "x-upsert": "true",
       },

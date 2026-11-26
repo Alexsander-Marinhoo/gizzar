@@ -2,11 +2,11 @@ import { products as defaultProducts, Product } from "@/data/products";
 import {
   DEFAULT_BANNER_UUID,
   deleteSupabaseProduct,
-  ensureUuid,
   fetchSupabaseBanner,
   fetchSupabaseOrders,
   fetchSupabaseProducts,
   patchSupabaseOrder,
+  signOutFromSupabaseAuth,
   upsertSupabaseBanner,
   upsertSupabaseOrder,
   upsertSupabaseProduct,
@@ -83,10 +83,13 @@ export interface AdminBannerConfig {
 }
 
 export interface AdminSession {
+  userId?: string;
   email: string;
   name: string;
   role: string;
   token: string;
+  refreshToken?: string;
+  expiresAt?: number;
   loggedInAt: string;
 }
 
@@ -94,7 +97,7 @@ const STORAGE_KEYS = {
   PRODUCTS: "gizzar_admin_products_v2",
   ORDERS: "gizzar_admin_orders_v2",
   BANNER: "gizzar_admin_banner_v2",
-  SESSION: "gizzar_admin_session",
+  SESSION: "gizzar_admin_session_v2",
 };
 
 export function formatOrderNumber(id: string): string {
@@ -361,7 +364,7 @@ export function getStoredProducts(): AdminProduct[] {
 
 export async function syncProductsFromSupabase(): Promise<AdminProduct[]> {
   const remote = await fetchSupabaseProducts();
-  if (remote && remote.length > 0) {
+  if (remote !== null) {
     if (isBrowser()) {
       const prevRaw = localStorage.getItem(STORAGE_KEYS.PRODUCTS);
       const nextRaw = JSON.stringify(remote);
@@ -495,7 +498,7 @@ export function getStoredOrders(): AdminOrder[] {
 
 export async function syncOrdersFromSupabase(): Promise<AdminOrder[]> {
   const remote = await fetchSupabaseOrders();
-  if (remote && remote.length > 0) {
+  if (remote !== null) {
     if (isBrowser()) {
       const prevRaw = localStorage.getItem(STORAGE_KEYS.ORDERS);
       const nextRaw = JSON.stringify(remote);
@@ -584,27 +587,39 @@ export async function syncAllWithSupabase() {
   return { products, orders, banner };
 }
 
-// AUTH SESSION
+// AUTH SESSION (Supabase Auth JWT)
 export function getAdminSession(): AdminSession | null {
   if (!isBrowser()) return null;
   try {
     const raw = localStorage.getItem(STORAGE_KEYS.SESSION);
     if (!raw) return null;
-    return JSON.parse(raw);
+    const parsed = JSON.parse(raw) as AdminSession;
+    // Garante que o token é um JWT real do Supabase Auth (3 partes separadas por ponto)
+    if (!parsed?.token || parsed.token.split(".").length !== 3) {
+      localStorage.removeItem(STORAGE_KEYS.SESSION);
+      return null;
+    }
+    return parsed;
   } catch {
     return null;
   }
 }
 
-export function setAdminSession(email: string, name = "Alexsander Marinho"): AdminSession {
+export function setAdminSession(
+  email: string,
+  name = "Alexsander Marinho",
+  token = "",
+  extra?: Partial<AdminSession>
+): AdminSession {
   const session: AdminSession = {
     email,
     name,
     role: "Administrador Master",
-    token: `session_${Date.now()}`,
+    token,
     loggedInAt: new Date().toISOString(),
+    ...extra,
   };
-  if (isBrowser()) {
+  if (isBrowser() && token) {
     localStorage.setItem(STORAGE_KEYS.SESSION, JSON.stringify(session));
   }
   return session;
@@ -612,6 +627,10 @@ export function setAdminSession(email: string, name = "Alexsander Marinho"): Adm
 
 export function clearAdminSession(): void {
   if (isBrowser()) {
+    const current = getAdminSession();
     localStorage.removeItem(STORAGE_KEYS.SESSION);
+    if (current?.token) {
+      void signOutFromSupabaseAuth(current.token);
+    }
   }
 }
